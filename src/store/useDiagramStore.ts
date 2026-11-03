@@ -10,8 +10,11 @@ import {
   parseDbmlToGraph,
   appendTableToDbml,
   appendRefToDbml,
+  updateTableInDbml,
+  removeTableFromDbml,
   type TableNode,
   type TableEdge,
+  type TableNodeData,
   type ParserError,
   type ColumnData,
   type CanvasPositions,
@@ -69,6 +72,9 @@ interface DiagramState {
   isSaving: boolean;
   lastSavedAt: Date | null;
 
+  // Modal de edición de tabla
+  editingTable: TableNodeData | null;
+
   // Acciones
   setActiveProject: (project: Project) => Promise<void>;
   closeProject: () => void;
@@ -76,7 +82,17 @@ interface DiagramState {
   onNodesChange: OnNodesChange<TableNode>;
   onEdgesChange: OnEdgesChange<TableEdge>;
   onConnect: (connection: Connection) => void;
-  addNewTable: (tableName: string, columns: ColumnData[]) => void;
+  addNewTable: (tableName: string, columns: ColumnData[], headerColor?: string, note?: string) => void;
+  openEditTableModal: (table: TableNodeData) => void;
+  closeEditTableModal: () => void;
+  updateTable: (
+    oldName: string,
+    newName: string,
+    columns: ColumnData[],
+    headerColor?: string,
+    note?: string
+  ) => void;
+  deleteTable: (tableName: string) => void;
   saveToDatabase: () => Promise<void>;
   setNodes: (nodes: TableNode[]) => void;
   setEdges: (edges: TableEdge[]) => void;
@@ -103,6 +119,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     isDirty: false,
     isSaving: false,
     lastSavedAt: null,
+    editingTable: null,
 
     setActiveProject: async (project: Project) => {
       try {
@@ -211,9 +228,36 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
       get().setDbmlCode(newDbml);
     },
 
-    addNewTable: (tableName: string, columns: ColumnData[]) => {
-      const newDbml = appendTableToDbml(get().dbmlCode, tableName, columns);
+    addNewTable: (tableName, columns, headerColor, note) => {
+      const newDbml = appendTableToDbml(get().dbmlCode, tableName, columns, headerColor, note);
       get().setDbmlCode(newDbml);
+    },
+
+    openEditTableModal: (table) => {
+      set({ editingTable: table });
+    },
+
+    closeEditTableModal: () => {
+      set({ editingTable: null });
+    },
+
+    updateTable: (oldName, newName, columns, headerColor, note) => {
+      const updatedDbml = updateTableInDbml(
+        get().dbmlCode,
+        oldName,
+        newName,
+        columns,
+        headerColor,
+        note
+      );
+      get().setDbmlCode(updatedDbml);
+      set({ editingTable: null });
+    },
+
+    deleteTable: (tableName) => {
+      const updatedDbml = removeTableFromDbml(get().dbmlCode, tableName);
+      get().setDbmlCode(updatedDbml);
+      set({ editingTable: null });
     },
 
     saveToDatabase: async () => {

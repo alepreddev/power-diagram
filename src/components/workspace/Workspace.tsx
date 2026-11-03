@@ -3,10 +3,13 @@ import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { DbmlEditor } from "@/components/editor/DbmlEditor";
 import { DiagramCanvas } from "@/components/canvas/DiagramCanvas";
+import { EditTableModal } from "@/components/modals/EditTableModal";
 import { Button } from "@/components/ui/button";
+import { useDiagramStore } from "@/store/useDiagramStore";
 
 export function Workspace() {
   const [isEditorOpen, setIsEditorOpen] = useState(true);
+  const { editingTable, closeEditTableModal } = useDiagramStore();
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100">
@@ -50,6 +53,15 @@ export function Workspace() {
           <DiagramCanvas />
         </div>
       </div>
+
+      {/* Modal Global para Editar la Tabla Seleccionada */}
+      <EditTableModal
+        open={Boolean(editingTable)}
+        onOpenChange={(open) => {
+          if (!open) closeEditTableModal();
+        }}
+        tableData={editingTable}
+      />
     </div>
   );
 }

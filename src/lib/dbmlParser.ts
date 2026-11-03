@@ -15,6 +15,7 @@ export interface TableNodeData {
   label: string;
   schema?: string;
   headerColor?: string;
+  note?: string;
   columns: ColumnData[];
   [key: string]: unknown;
 }
@@ -118,6 +119,7 @@ export function parseDbmlToGraph(
             label: tableName,
             schema: schema.name || undefined,
             headerColor: (table.headerColor as unknown as string) || undefined,
+            note: table.note || undefined,
             columns,
           },
         });
@@ -203,14 +205,19 @@ export function parseDbmlToGraph(
 }
 
 /**
- * Agrega de manera limpia una nueva tabla al final del código DBML
- * sin reformatear ni alterar el código existente del usuario.
+ * Genera el bloque de texto DBML para una tabla con opciones de settings (color, nota).
  */
-export function appendTableToDbml(
-  currentDbml: string,
+export function generateTableBlock(
   tableName: string,
-  columns: ColumnData[]
+  columns: ColumnData[],
+  headerColor?: string,
+  note?: string
 ): string {
+  const settings: string[] = [];
+  if (headerColor) settings.push(`headercolor: ${headerColor}`);
+  if (note && note.trim()) settings.push(`note: '${note.replace(/'/g, "\\'")}'`);
+  const settingsStr = settings.length > 0 ? ` [${settings.join(", ")}]` : "";
+
   const formattedColumns = columns
     .map((col) => {
       const constraints: string[] = [];
@@ -218,15 +225,92 @@ export function appendTableToDbml(
       if (col.increment) constraints.push("increment");
       if (col.unique) constraints.push("unique");
       if (col.notNull) constraints.push("not null");
-      if (col.note) constraints.push(`note: '${col.note}'`);
+      if (col.note) constraints.push(`note: '${col.note.replace(/'/g, "\\'")}'`);
 
       const constraintStr = constraints.length > 0 ? ` [${constraints.join(", ")}]` : "";
       return `  ${col.name} ${col.type || "varchar"}${constraintStr}`;
     })
     .join("\n");
 
-  const tableBlock = `\nTable ${tableName} {\n${formattedColumns}\n}\n`;
-  return `${currentDbml.trimEnd()}\n${tableBlock}`;
+  return `Table ${tableName}${settingsStr} {\n${formattedColumns}\n}`;
+}
+
+/**
+ * Agrega de manera limpia una nueva tabla al final del código DBML
+ * sin reformatear ni alterar el código existente del usuario.
+ */
+export function appendTableToDbml(
+  currentDbml: string,
+  tableName: string,
+  columns: ColumnData[],
+  headerColor?: string,
+  note?: string
+): string {
+  const tableBlock = generateTableBlock(tableName, columns, headerColor, note);
+  return `${currentDbml.trimEnd()}\n\n${tableBlock}\n`;
+}
+
+/**
+ * Actualiza una tabla existente en el código DBML reemplazando su bloque sin
+ * alterar comentarios ni el resto del documento. Si el nombre de la tabla cambia,
+ * actualiza automáticamente las directivas Ref asociadas.
+ */
+export function updateTableInDbml(
+  currentDbml: string,
+  oldTableName: string,
+  newTableName: string,
+  columns: ColumnData[],
+  headerColor?: string,
+  note?: string
+): string {
+  const newBlock = generateTableBlock(newTableName, columns, headerColor, note);
+
+  // Expresión regular que coincide con: Table [schema.]tableName [settings] { ... }
+  const tableRegex = new RegExp(
+    `\\bTable\\s+(?:[\\w_]+\\.)?["']?${oldTableName}["']?\\s*(?:\\[[^\\]]*\\])?\\s*\\{[^\\}]*\\}`,
+    "i"
+  );
+
+  let updated = currentDbml;
+  if (tableRegex.test(updated)) {
+    updated = updated.replace(tableRegex, newBlock);
+  } else {
+    // Si no coincidió, anexar al final
+    updated = `${updated.trimEnd()}\n\n${newBlock}\n`;
+  }
+
+  // Si el nombre de la tabla cambió, actualizar todas las relaciones Ref existentes
+  if (oldTableName.toLowerCase() !== newTableName.toLowerCase()) {
+    const refSourceRegex = new RegExp(`\\b${oldTableName}\\.`, "gi");
+    updated = updated.replace(refSourceRegex, `${newTableName}.`);
+  }
+
+  return updated;
+}
+
+/**
+ * Elimina una tabla y todas sus referencias asociadas (Ref) del código DBML.
+ */
+export function removeTableFromDbml(currentDbml: string, tableName: string): string {
+  const tableRegex = new RegExp(
+    `\\bTable\\s+(?:[\\w_]+\\.)?["']?${tableName}["']?\\s*(?:\\[[^\\]]*\\])?\\s*\\{[^\\}]*\\}\\s*`,
+    "i"
+  );
+
+  let updated = currentDbml.replace(tableRegex, "");
+
+  // Eliminar directivas Ref asociadas a esta tabla
+  const refRegex1 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+\\s*[><-]\\s*.*$\\n?`,
+    "gmi"
+  );
+  const refRegex2 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*.*\\s*[><-]\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+.*$\\n?`,
+    "gmi"
+  );
+
+  updated = updated.replace(refRegex1, "").replace(refRegex2, "");
+  return updated.trimEnd() + "\n";
 }
 
 /**
