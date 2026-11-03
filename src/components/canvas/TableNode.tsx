@@ -1,7 +1,8 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Key, Database, Hash, Type, Calendar, ToggleLeft, FileText } from "lucide-react";
+import { Key, Database, Hash, Type, Calendar, ToggleLeft, FileText, Settings } from "lucide-react";
 import type { TableNode, ColumnData } from "@/lib/dbmlParser";
+import { useDiagramStore } from "@/store/useDiagramStore";
 
 // Selector de iconos según el tipo de dato SQL/DBML
 function getTypeIcon(typeName: string) {
@@ -21,15 +22,25 @@ function getTypeIcon(typeName: string) {
   return <FileText className="w-3 h-3 text-zinc-400/80" />;
 }
 
-function ColumnRow({ column }: { column: ColumnData }) {
+interface ColumnRowProps {
+  column: ColumnData;
+  isLeftConnected: boolean;
+  isRightConnected: boolean;
+}
+
+function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps) {
   return (
     <div className="relative group/col flex items-center justify-between px-3 py-1.5 hover:bg-zinc-800/60 transition-colors border-b border-zinc-800/40 last:border-b-0 text-xs">
-      {/* Handle Izquierdo (Target) */}
+      {/* Handle Izquierdo (Target): solo visible si está conectado o al pasar el cursor */}
       <Handle
         type="target"
         position={Position.Left}
         id={`${column.name}-target`}
-        className="!w-2 !h-2 !-left-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full opacity-60 group-hover/col:opacity-100 hover:!scale-150 transition-all cursor-crosshair"
+        className={`!w-2 !h-2 !-left-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+          isLeftConnected
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
+        }`}
       />
 
       {/* Nombre y símbolo de la columna */}
@@ -76,12 +87,16 @@ function ColumnRow({ column }: { column: ColumnData }) {
         )}
       </div>
 
-      {/* Handle Derecho (Source) */}
+      {/* Handle Derecho (Source): solo visible si está conectado o al pasar el cursor */}
       <Handle
         type="source"
         position={Position.Right}
         id={`${column.name}-source`}
-        className="!w-2 !h-2 !-right-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full opacity-60 group-hover/col:opacity-100 hover:!scale-150 transition-all cursor-crosshair"
+        className={`!w-2 !h-2 !-right-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+          isRightConnected
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
+        }`}
       />
     </div>
   );
@@ -89,6 +104,24 @@ function ColumnRow({ column }: { column: ColumnData }) {
 
 function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
   const headerColor = data.headerColor || "#4f46e5"; // Indigo por defecto
+  const openEditTableModal = useDiagramStore((state) => state.openEditTableModal);
+  const edges = useDiagramStore((state) => state.edges);
+
+  const tableName = data.label;
+
+  // Mapear los handles que tienen relaciones activas
+  const connectedHandles = useMemo(() => {
+    const set = new Set<string>();
+    for (const edge of edges) {
+      if (edge.source === tableName && edge.sourceHandle) {
+        set.add(edge.sourceHandle);
+      }
+      if (edge.target === tableName && edge.targetHandle) {
+        set.add(edge.targetHandle);
+      }
+    }
+    return set;
+  }, [edges, tableName]);
 
   return (
     <div
@@ -117,9 +150,22 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
             </span>
           )}
         </div>
-        <span className="text-[10px] text-zinc-400 font-mono bg-zinc-800/80 px-1.5 py-0.5 rounded">
-          {data.columns.length} cols
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[10px] text-zinc-400 font-mono bg-zinc-800/80 px-1.5 py-0.5 rounded">
+            {data.columns.length} cols
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              openEditTableModal(data);
+            }}
+            className="p-0.5 rounded text-zinc-400 hover:text-indigo-400 hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
+            title="Editar características de la tabla"
+          >
+            <Settings className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Lista de columnas */}
@@ -129,7 +175,14 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
             Sin columnas definidas
           </div>
         ) : (
-          data.columns.map((col) => <ColumnRow key={col.name} column={col} />)
+          data.columns.map((col) => (
+            <ColumnRow
+              key={col.name}
+              column={col}
+              isLeftConnected={connectedHandles.has(`${col.name}-target`)}
+              isRightConnected={connectedHandles.has(`${col.name}-source`)}
+            />
+          ))
         )}
       </div>
     </div>
@@ -137,4 +190,5 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
 }
 
 export const TableNodeMemo = memo(TableNodeComponent);
+
 
