@@ -106,24 +106,30 @@ export function SqlExchangeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl bg-zinc-900 border-zinc-800 text-zinc-100 shadow-2xl flex flex-col max-h-[85vh]">
-        <DialogHeader className="shrink-0 pb-2 border-b border-zinc-800">
-          <div className="flex items-center justify-between">
+      <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl bg-zinc-900 border-zinc-800 text-zinc-100 shadow-2xl p-6 flex flex-col max-h-[90vh]">
+        {/* Cabecera espaciosa con margen derecho para no chocar con el botón cerrar */}
+        <DialogHeader className="shrink-0 pr-10 pb-3 border-b border-zinc-800/80 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Database className="w-5 h-5 text-indigo-400" />
-              <DialogTitle className="text-base font-bold text-zinc-100">
-                Intercambio SQL y Esquemas
-              </DialogTitle>
+              <div>
+                <DialogTitle className="text-base font-bold text-zinc-100">
+                  Intercambio SQL y Esquemas DDL
+                </DialogTitle>
+                <DialogDescription className="text-xs text-zinc-400 mt-0.5">
+                  Exporta tu arquitectura a scripts SQL nativos o importa esquemas existentes mediante ingeniería inversa.
+                </DialogDescription>
+              </div>
             </div>
 
-            {/* Pestañas de Exportar / Importar */}
-            <div className="flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800">
+            {/* Pestañas de Exportar / Importar con buen ancho */}
+            <div className="inline-flex items-center bg-zinc-950 p-1 rounded-lg border border-zinc-800 shrink-0 self-start sm:self-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab("export")}
-                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   activeTab === "export"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-indigo-600 text-white shadow"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
@@ -132,9 +138,9 @@ export function SqlExchangeModal({
               <button
                 type="button"
                 onClick={() => setActiveTab("import")}
-                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
                   activeTab === "import"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-indigo-600 text-white shadow"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
@@ -142,23 +148,23 @@ export function SqlExchangeModal({
               </button>
             </div>
           </div>
-          <DialogDescription className="text-xs text-zinc-400">
-            {activeTab === "export"
-              ? "Genera y descarga scripts DDL nativos para tu motor de base de datos preferido."
-              : "Convierte scripts SQL existentes (.sql) en diagramas DBML mediante ingeniería inversa."}
-          </DialogDescription>
         </DialogHeader>
 
-        {/* Pestaña: EXPORTAR */}
+        {/* ========================================================
+            PESTAÑA: EXPORTAR SQL
+           ======================================================== */}
         {activeTab === "export" ? (
           <div className="flex flex-col flex-1 overflow-hidden space-y-3 pt-3">
-            <div className="flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-zinc-300">Motor de Base de Datos:</span>
+            {/* Barra de configuración y acciones */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-950/80 border border-zinc-800/80 p-2.5 rounded-lg shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-semibold text-zinc-300 whitespace-nowrap">
+                  Motor de Base de Datos:
+                </span>
                 <select
                   value={exportDialect}
                   onChange={(e) => setExportDialect(e.target.value as ExportDialect)}
-                  className="bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded px-2.5 h-8 focus:outline-none"
+                  className="bg-zinc-900 border border-zinc-700/80 text-zinc-100 text-xs rounded-md px-3 h-8 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
                 >
                   <option value="postgres">PostgreSQL</option>
                   <option value="mysql">MySQL</option>
@@ -173,12 +179,12 @@ export function SqlExchangeModal({
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
-                  className="h-8 text-xs bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-200 gap-1.5"
+                  className="h-8 text-xs bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-200 gap-1.5"
                 >
                   {copied ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copiado</span>
+                      <span className="text-emerald-400 font-medium">Copiado</span>
                     </>
                   ) : (
                     <>
@@ -192,7 +198,7 @@ export function SqlExchangeModal({
                   variant="default"
                   size="sm"
                   onClick={handleDownload}
-                  className="h-8 text-xs bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 font-medium"
+                  className="h-8 text-xs bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 font-semibold shadow"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Descargar .{exportDialect === "json" ? "json" : "sql"}</span>
@@ -200,8 +206,8 @@ export function SqlExchangeModal({
               </div>
             </div>
 
-            {/* Vista previa del SQL generado */}
-            <div className="flex-1 min-h-[300px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950">
+            {/* Visor de código SQL */}
+            <div className="flex-1 min-h-[360px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 shadow-inner">
               <CodeMirror
                 value={exportedSql}
                 height="100%"
@@ -213,15 +219,20 @@ export function SqlExchangeModal({
             </div>
           </div>
         ) : (
-          /* Pestaña: IMPORTAR (Ingeniería Inversa) */
+          /* ========================================================
+             PESTAÑA: IMPORTAR SQL (Ingeniería Inversa)
+             ======================================================== */
           <div className="flex flex-col flex-1 overflow-hidden space-y-3 pt-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-zinc-300">Dialecto de Origen:</span>
+            {/* Barra de opciones de importación */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-zinc-950/80 border border-zinc-800/80 p-2.5 rounded-lg shrink-0">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-semibold text-zinc-300 whitespace-nowrap">
+                  Dialecto de Origen:
+                </span>
                 <select
                   value={importDialect}
                   onChange={(e) => setImportDialect(e.target.value as ImportDialect)}
-                  className="bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded px-2.5 h-8 focus:outline-none"
+                  className="bg-zinc-900 border border-zinc-700/80 text-zinc-100 text-xs rounded-md px-3 h-8 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
                 >
                   <option value="postgres">PostgreSQL DDL</option>
                   <option value="mysql">MySQL DDL</option>
@@ -229,8 +240,8 @@ export function SqlExchangeModal({
                 </select>
               </div>
 
-              <div className="flex items-center gap-3">
-                <label className="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer inline-flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1.5 rounded border border-zinc-700">
+              <div className="flex flex-wrap items-center gap-3">
+                <label className="text-xs text-zinc-300 hover:text-zinc-100 cursor-pointer inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 px-3 py-1.5 rounded-md border border-zinc-700 transition-colors">
                   <FileCode className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Cargar archivo .sql</span>
                   <input
@@ -241,24 +252,26 @@ export function SqlExchangeModal({
                   />
                 </label>
 
-                <div className="flex items-center gap-2 text-xs text-zinc-300 bg-zinc-950 px-2 py-1 rounded border border-zinc-800">
-                  <label className="flex items-center gap-1 cursor-pointer">
+                <div className="flex items-center gap-3 text-xs text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-md border border-zinc-800">
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-300">
                     <input
                       type="radio"
                       name="importMode"
                       value="replace"
                       checked={importMode === "replace"}
                       onChange={() => setImportMode("replace")}
+                      className="accent-indigo-500"
                     />
                     <span>Reemplazar</span>
                   </label>
-                  <label className="flex items-center gap-1 cursor-pointer">
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-300">
                     <input
                       type="radio"
                       name="importMode"
                       value="append"
                       checked={importMode === "append"}
                       onChange={() => setImportMode("append")}
+                      className="accent-indigo-500"
                     />
                     <span>Añadir</span>
                   </label>
@@ -267,12 +280,12 @@ export function SqlExchangeModal({
             </div>
 
             {/* Input de código SQL */}
-            <div className="flex-1 min-h-[260px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950">
+            <div className="flex-1 min-h-[300px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 shadow-inner">
               <CodeMirror
                 value={inputSql}
                 height="100%"
                 theme="dark"
-                placeholder="Pega aquí tus instrucciones CREATE TABLE y ALTER TABLE..."
+                placeholder="Pega aquí tus instrucciones SQL (ej: CREATE TABLE users (...); o ALTER TABLE ...)"
                 extensions={[sql()]}
                 onChange={(val) => setInputSql(val)}
                 className="text-[13px] font-mono h-full"
@@ -280,18 +293,18 @@ export function SqlExchangeModal({
             </div>
 
             {importError && (
-              <div className="p-2.5 bg-red-950/60 border border-red-900/60 rounded text-xs text-red-300 flex items-start gap-2">
+              <div className="p-3 bg-red-950/70 border border-red-900/80 rounded-md text-xs text-red-200 flex items-start gap-2 shrink-0">
                 <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <span>{importError}</span>
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800 shrink-0">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-zinc-800 shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => onOpenChange(false)}
-                className="text-xs text-zinc-400"
+                className="text-xs text-zinc-400 hover:text-zinc-200"
               >
                 Cancelar
               </Button>
@@ -300,7 +313,7 @@ export function SqlExchangeModal({
                 size="sm"
                 onClick={handleImportSubmit}
                 disabled={!inputSql.trim()}
-                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold gap-1.5"
+                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold gap-1.5 px-4 shadow"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>Convertir a Diagrama DBML</span>
@@ -313,4 +326,3 @@ export function SqlExchangeModal({
     </Dialog>
   );
 }
-
