@@ -1,18 +1,41 @@
-import { useState, useEffect } from "react";
-import { Plus, Database, Trash2, ArrowRight, Layers, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Database, Trash2, ArrowRight, Layers, Sparkles, ChevronDown, Check } from "lucide-react";
 import { getProjects, createProject, deleteProject, type Project } from "@/db/database";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const DB_ENGINES = [
+  { value: "postgres", label: "PostgreSQL", badge: "PG", color: "text-sky-400 bg-sky-500/10 border-sky-500/30" },
+  { value: "mysql", label: "MySQL", badge: "MY", color: "text-amber-400 bg-amber-500/10 border-amber-500/30" },
+  { value: "sqlite", label: "SQLite", badge: "SQ", color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30" },
+  { value: "mssql", label: "SQL Server", badge: "MS", color: "text-rose-400 bg-rose-500/10 border-rose-500/30" },
+] as const;
+
+type EngineType = (typeof DB_ENGINES)[number]["value"];
+
 export function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
-  const [engine, setEngine] = useState<"postgres" | "mysql" | "sqlite" | "mssql">("postgres");
+  const [engine, setEngine] = useState<EngineType>("postgres");
+  const [isEngineOpen, setIsEngineOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { setActiveProject } = useDiagramStore();
+
+  const selectedEngine = DB_ENGINES.find((e) => e.value === engine) || DB_ENGINES[0];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsEngineOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const loadProjects = async () => {
     try {
@@ -75,10 +98,10 @@ export function ProjectDashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-zinc-400">
+        {/* <div className="flex items-center gap-2 text-xs text-zinc-400">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span>SQLite Local Activo</span>
-        </div>
+        </div> */}
       </nav>
 
       {/* Contenido principal */}
@@ -105,16 +128,48 @@ export function ProjectDashboard() {
               required
             />
 
-            <select
-              value={engine}
-              onChange={(e) => setEngine(e.target.value as any)}
-              className="bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded-md px-3 h-10 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            >
-              <option value="postgres">PostgreSQL</option>
-              <option value="mysql">MySQL</option>
-              <option value="sqlite">SQLite</option>
-              <option value="mssql">SQL Server</option>
-            </select>
+            {/* Custom Dropdown para el Motor de Base de Datos */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsEngineOpen(!isEngineOpen)}
+                className="h-10 px-3 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs rounded-md flex items-center gap-2.5 transition-colors focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-sm"
+              >
+                <span className={`text-[10px] font-mono px-1 py-0.2 rounded border ${selectedEngine.color}`}>
+                  {selectedEngine.badge}
+                </span>
+                <span className="font-medium text-xs text-zinc-200">{selectedEngine.label}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 transition-transform ${isEngineOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {isEngineOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-48 bg-zinc-900 border border-zinc-800 rounded-lg shadow-2xl p-1 z-30 space-y-0.5 animate-in fade-in-50 zoom-in-95 duration-100">
+                  {DB_ENGINES.map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => {
+                        setEngine(item.value);
+                        setIsEngineOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-2 text-xs rounded-md transition-colors ${
+                        engine === item.value
+                          ? "bg-indigo-600/20 text-indigo-300 font-medium"
+                          : "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[9px] font-mono px-1 py-0.2 rounded border ${item.color}`}>
+                          {item.badge}
+                        </span>
+                        <span>{item.label}</span>
+                      </div>
+                      {engine === item.value && <Check className="w-3.5 h-3.5 text-indigo-400" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <Button
               type="submit"

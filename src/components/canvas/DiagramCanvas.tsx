@@ -44,6 +44,8 @@ function CanvasContent() {
         fitView
         minZoom={0.15}
         maxZoom={2}
+        colorMode="dark"
+        className="dark"
         defaultEdgeOptions={{
           type: "smoothstep",
           style: { stroke: "#64748b", strokeWidth: 1.5 },
@@ -51,7 +53,10 @@ function CanvasContent() {
         proOptions={{ hideAttribution: true }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#27272a" />
-        <Controls className="!bg-zinc-900 !border-zinc-800 !text-zinc-100 !fill-zinc-100 shadow-xl" />
+        <Controls
+          position="bottom-left"
+          showInteractive={true}
+        />
         <MiniMap
           nodeColor="#6366f1"
           maskColor="rgba(9, 9, 11, 0.75)"
