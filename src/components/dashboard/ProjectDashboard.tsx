@@ -4,6 +4,7 @@ import { getProjects, createProject, deleteProject, type Project } from "@/db/da
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const DB_ENGINES = [
   { value: "postgres", label: "PostgreSQL", badge: "PG", color: "text-sky-400 bg-sky-500/10 border-sky-500/30" },
@@ -98,10 +99,9 @@ export function ProjectDashboard() {
           </div>
         </div>
 
-        {/* <div className="flex items-center gap-2 text-xs text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span>SQLite Local Activo</span>
-        </div> */}
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+        </div>
       </nav>
 
       {/* Contenido principal */}

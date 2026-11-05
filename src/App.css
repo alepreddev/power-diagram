@@ -127,47 +127,54 @@
   }
   html {
     @apply font-sans;
-    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;
-    color-scheme: dark;
   }
 
-  /* Normalización de selects nativos para evitar cajas blancas en Linux/WebKit */
+  /* Normalización de selects nativos */
   select {
+    color-scheme: light;
+    background-color: #ffffff;
+    color: #09090b;
+  }
+  select option {
+    background-color: #ffffff;
+    color: #09090b;
+  }
+  .dark select {
     color-scheme: dark;
     background-color: #09090b;
     color: #f4f4f5;
   }
-  select option {
+  .dark select option {
     background-color: #18181b;
     color: #f4f4f5;
   }
 }
 
 /* ==========================================================
-   REACT FLOW: Estilos del Lienzo en Modo Oscuro Profesional
+   REACT FLOW: Estilos del Lienzo en Modo Claro y Oscuro
    ========================================================== */
 
-/* Barra de controles (Zoom, Fit View, Lock) */
+/* Barra de controles (Zoom, Fit View, Lock) - Modo Claro por defecto */
 .react-flow__controls {
   border-radius: 8px !important;
   overflow: hidden !important;
-  border: 1px solid #27272a !important; /* zinc-800 */
-  background-color: #18181b !important; /* zinc-900 */
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid #e2e8f0 !important; /* slate-200 */
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   padding: 0 !important;
   display: flex !important;
   flex-direction: column !important;
 }
 
 .react-flow__controls-button {
-  background-color: #18181b !important; /* zinc-900 */
+  background-color: #ffffff !important;
   border: none !important;
-  border-bottom: 1px solid #27272a !important; /* zinc-800 */
-  color: #a1a1aa !important; /* zinc-400 */
-  fill: #a1a1aa !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #64748b !important; /* slate-500 */
+  fill: #64748b !important;
   width: 32px !important;
   height: 32px !important;
   box-sizing: border-box !important;
@@ -183,9 +190,9 @@
 }
 
 .react-flow__controls-button:hover {
-  background-color: #27272a !important; /* zinc-800 */
-  color: #6366f1 !important; /* indigo-500 */
-  fill: #6366f1 !important;
+  background-color: #f1f5f9 !important; /* slate-100 */
+  color: #4f46e5 !important; /* indigo-600 */
+  fill: #4f46e5 !important;
 }
 
 .react-flow__controls-button svg {
@@ -197,15 +204,47 @@
   max-height: 14px !important;
 }
 
-/* Minimapa en Modo Oscuro */
+/* Minimapa en Modo Claro */
 .react-flow__minimap {
-  background-color: #09090b !important; /* zinc-950 */
-  border: 1px solid #27272a !important;
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
   border-radius: 8px !important;
   overflow: hidden !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .react-flow__minimap-mask {
+  fill: rgba(241, 245, 249, 0.75) !important;
+}
+
+/* ----------------------------------------------------------
+   REACT FLOW: Modificaciones en Modo Oscuro (.dark)
+   ---------------------------------------------------------- */
+.dark .react-flow__controls {
+  border: 1px solid #27272a !important; /* zinc-800 */
+  background-color: #18181b !important; /* zinc-900 */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .react-flow__controls-button {
+  background-color: #18181b !important;
+  border-bottom: 1px solid #27272a !important;
+  color: #a1a1aa !important; /* zinc-400 */
+  fill: #a1a1aa !important;
+}
+
+.dark .react-flow__controls-button:hover {
+  background-color: #27272a !important;
+  color: #818cf8 !important; /* indigo-400 */
+  fill: #818cf8 !important;
+}
+
+.dark .react-flow__minimap {
+  background-color: #09090b !important; /* zinc-950 */
+  border: 1px solid #27272a !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .react-flow__minimap-mask {
   fill: rgba(9, 9, 11, 0.8) !important;
 }

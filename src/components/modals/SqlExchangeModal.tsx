@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/store/useDiagramStore";
+import { useThemeStore } from "@/store/useThemeStore";
 import {
   exportDbmlToSql,
   importSqlToDbml,
@@ -40,6 +41,7 @@ export function SqlExchangeModal({
   defaultTab = "export",
 }: SqlExchangeModalProps) {
   const { dbmlCode, setDbmlCode, activeProject } = useDiagramStore();
+  const { resolvedTheme } = useThemeStore();
 
   const [activeTab, setActiveTab] = useState<"export" | "import">(defaultTab);
   const [exportDialect, setExportDialect] = useState<ExportDialect>("postgres");
@@ -207,11 +209,11 @@ export function SqlExchangeModal({
             </div>
 
             {/* Visor de código SQL */}
-            <div className="flex-1 min-h-[360px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 shadow-inner">
+            <div className="flex-1 min-h-[360px] border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
               <CodeMirror
                 value={exportedSql}
                 height="100%"
-                theme="dark"
+                theme={resolvedTheme}
                 extensions={[sql()]}
                 editable={false}
                 className="text-[13px] font-mono h-full"
@@ -280,11 +282,11 @@ export function SqlExchangeModal({
             </div>
 
             {/* Input de código SQL */}
-            <div className="flex-1 min-h-[300px] border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 shadow-inner">
+            <div className="flex-1 min-h-[300px] border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
               <CodeMirror
                 value={inputSql}
                 height="100%"
-                theme="dark"
+                theme={resolvedTheme}
                 placeholder="Pega aquí tus instrucciones SQL (ej: CREATE TABLE users (...); o ALTER TABLE ...)"
                 extensions={[sql()]}
                 onChange={(val) => setInputSql(val)}
