@@ -29,8 +29,11 @@ export async function exportDiagramImage(
     padding
   );
 
+  const isDark = typeof document !== "undefined" && document.documentElement.classList.contains("dark");
+  const backgroundColor = isDark ? "#09090b" : "#f8fafc";
+
   const options = {
-    backgroundColor: "#09090b", // zinc-950
+    backgroundColor,
     width: imageWidth,
     height: imageHeight,
     style: {

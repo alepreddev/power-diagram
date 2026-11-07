@@ -83,15 +83,15 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-zinc-900 border-zinc-800 text-zinc-100 shadow-2xl p-6">
-        <DialogHeader className="pr-10 pb-2 border-b border-zinc-800/80">
+      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6">
+        <DialogHeader className="pr-10 pb-2 border-b border-slate-200 dark:border-zinc-800/80">
           <div className="flex items-center gap-2">
-            <Database className="w-5 h-5 text-indigo-400" />
-            <DialogTitle className="text-base font-bold text-zinc-100">
+            <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
               Crear Nueva Tabla Visualmente
             </DialogTitle>
           </div>
-          <DialogDescription className="text-xs text-zinc-400">
+          <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400">
             Define el nombre, color de encabezado y columnas. La tabla se inyectará de forma quirúrgica en el código DBML y en el lienzo.
           </DialogDescription>
         </DialogHeader>
@@ -100,26 +100,26 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
           {/* Nombre y Color */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
             <div className="sm:col-span-8 space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Nombre de la Tabla</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Nombre de la Tabla</label>
               <Input
                 placeholder="ej. clientes, facturas, productos"
                 value={tableName}
                 onChange={(e) => setTableName(e.target.value)}
-                className="bg-zinc-950 border-zinc-800 text-zinc-100 text-xs h-9 w-full"
+                className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-9 w-full shadow-sm"
                 required
               />
             </div>
 
             <div className="sm:col-span-4 space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300">Color de Acento</label>
-              <div className="flex items-center gap-2 h-9 px-3 bg-zinc-950 border border-zinc-800 rounded-md">
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Color de Acento</label>
+              <div className="flex items-center gap-2 h-9 px-3 bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-md">
                 {COLOR_PRESETS.map((c) => (
                   <button
                     key={c.value}
                     type="button"
                     onClick={() => setHeaderColor(c.value)}
                     className={`w-5 h-5 rounded-full transition-transform ${
-                      headerColor === c.value ? "scale-125 ring-2 ring-white" : "opacity-60 hover:opacity-100"
+                      headerColor === c.value ? "scale-125 ring-2 ring-indigo-500 dark:ring-white" : "opacity-60 hover:opacity-100"
                     }`}
                     style={{ backgroundColor: c.value }}
                     title={c.label}
@@ -132,32 +132,32 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
           {/* Listado dinámico de columnas */}
           <div className="space-y-2">
             <div className="flex items-center justify-between pb-1">
-              <span className="text-xs font-semibold text-zinc-300">Columnas / Campos ({columns.length})</span>
+              <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Columnas / Campos ({columns.length})</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleAddColumn}
-                className="h-7 text-xs bg-zinc-800 border-zinc-700 hover:bg-zinc-700 text-zinc-200 gap-1.5"
+                className="h-7 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 gap-1.5"
               >
-                <Plus className="w-3.5 h-3.5 text-indigo-400" />
+                <Plus className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
                 <span>Agregar Columna</span>
               </Button>
             </div>
 
             {/* Cabecera de columnas para orden visual */}
-            <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+            <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
               <span className="col-span-5">Nombre de Columna</span>
               <span className="col-span-3">Tipo SQL</span>
               <span className="col-span-3 text-center">Restricciones</span>
               <span className="col-span-1 text-right">Borrar</span>
             </div>
 
-            <div className="max-h-64 overflow-y-auto space-y-2 pr-1 border border-zinc-800 rounded-lg p-2.5 bg-zinc-950/70">
+            <div className="max-h-64 overflow-y-auto space-y-2 pr-1 border border-slate-200 dark:border-zinc-800 rounded-lg p-2.5 bg-slate-50/50 dark:bg-zinc-950/70">
               {columns.map((col, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-zinc-900 border border-zinc-800 p-2 rounded-md text-xs shadow-sm hover:border-zinc-700 transition-colors"
+                  className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-2 rounded-md text-xs shadow-sm hover:border-slate-300 dark:hover:border-zinc-700 transition-colors"
                 >
                   {/* Input nombre */}
                   <div className="sm:col-span-5">
@@ -165,7 +165,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
                       placeholder="Nombre campo (ej. email)"
                       value={col.name}
                       onChange={(e) => handleColumnChange(idx, "name", e.target.value)}
-                      className="bg-zinc-950 border-zinc-800 text-zinc-100 text-xs h-8 px-2.5 w-full"
+                      className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-8 px-2.5 w-full font-medium"
                       required
                     />
                   </div>
@@ -175,7 +175,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
                     <select
                       value={col.type}
                       onChange={(e) => handleColumnChange(idx, "type", e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 text-zinc-200 text-xs rounded-md h-8 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                      className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-xs rounded-md h-8 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
                     >
                       {COMMON_SQL_TYPES.map((t) => (
                         <option key={t} value={t}>
@@ -186,36 +186,36 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
                   </div>
 
                   {/* Toggles restricciones */}
-                  <div className="sm:col-span-3 flex items-center justify-center gap-3 px-2 py-1 bg-zinc-950 border border-zinc-800/80 rounded-md text-[11px] text-zinc-400 shrink-0">
-                    <label className="flex items-center gap-1 cursor-pointer hover:text-amber-300" title="Primary Key">
+                  <div className="sm:col-span-3 flex items-center justify-center gap-3 px-2 py-1 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800/80 rounded-md text-[11px] text-slate-600 dark:text-zinc-400 shrink-0">
+                    <label className="flex items-center gap-1 cursor-pointer hover:text-amber-500" title="Primary Key">
                       <input
                         type="checkbox"
                         checked={col.pk}
                         onChange={(e) => handleColumnChange(idx, "pk", e.target.checked)}
-                        className="rounded border-zinc-700 text-amber-500 focus:ring-0 accent-amber-500"
+                        className="rounded border-slate-300 dark:border-zinc-700 text-amber-500 focus:ring-0 accent-amber-500"
                       />
-                      <Key className="w-3 h-3 text-amber-400" />
-                      <span className={col.pk ? "font-bold text-amber-400" : ""}>PK</span>
+                      <Key className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+                      <span className={col.pk ? "font-bold text-amber-600 dark:text-amber-400" : ""}>PK</span>
                     </label>
 
-                    <label className="flex items-center gap-1 cursor-pointer hover:text-indigo-300" title="Not Null">
+                    <label className="flex items-center gap-1 cursor-pointer hover:text-indigo-500" title="Not Null">
                       <input
                         type="checkbox"
                         checked={col.notNull}
                         onChange={(e) => handleColumnChange(idx, "notNull", e.target.checked)}
-                        className="rounded border-zinc-700 text-indigo-500 focus:ring-0 accent-indigo-500"
+                        className="rounded border-slate-300 dark:border-zinc-700 text-indigo-500 focus:ring-0 accent-indigo-500"
                       />
-                      <span className={col.notNull ? "font-bold text-indigo-400" : ""}>NN</span>
+                      <span className={col.notNull ? "font-bold text-indigo-600 dark:text-indigo-400" : ""}>NN</span>
                     </label>
 
-                    <label className="flex items-center gap-1 cursor-pointer hover:text-sky-300" title="Unique">
+                    <label className="flex items-center gap-1 cursor-pointer hover:text-sky-500" title="Unique">
                       <input
                         type="checkbox"
                         checked={col.unique}
                         onChange={(e) => handleColumnChange(idx, "unique", e.target.checked)}
-                        className="rounded border-zinc-700 text-sky-500 focus:ring-0 accent-sky-500"
+                        className="rounded border-slate-300 dark:border-zinc-700 text-sky-500 focus:ring-0 accent-sky-500"
                       />
-                      <span className={col.unique ? "font-bold text-sky-400" : ""}>UQ</span>
+                      <span className={col.unique ? "font-bold text-sky-600 dark:text-sky-400" : ""}>UQ</span>
                     </label>
                   </div>
 
@@ -227,7 +227,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
                       size="sm"
                       onClick={() => handleRemoveColumn(idx)}
                       disabled={columns.length <= 1}
-                      className="h-8 w-8 p-0 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-md disabled:opacity-20"
+                      className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded-md disabled:opacity-20"
                       title="Eliminar columna"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -238,13 +238,13 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-3 pt-3 border-t border-zinc-800">
+          <DialogFooter className="gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-zinc-800">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => onOpenChange(false)}
-              className="text-xs text-zinc-400 hover:text-zinc-200"
+              className="text-xs text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
             >
               Cancelar
             </Button>
