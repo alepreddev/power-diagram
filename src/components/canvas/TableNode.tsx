@@ -8,18 +8,18 @@ import { useDiagramStore } from "@/store/useDiagramStore";
 function getTypeIcon(typeName: string) {
   const lower = typeName.toLowerCase();
   if (lower.includes("int") || lower.includes("serial") || lower.includes("num") || lower.includes("float") || lower.includes("decimal")) {
-    return <Hash className="w-3 h-3 text-emerald-400/80" />;
+    return <Hash className="w-3 h-3 text-emerald-600 dark:text-emerald-400/80" />;
   }
   if (lower.includes("char") || lower.includes("text") || lower.includes("string")) {
-    return <Type className="w-3 h-3 text-sky-400/80" />;
+    return <Type className="w-3 h-3 text-sky-600 dark:text-sky-400/80" />;
   }
   if (lower.includes("time") || lower.includes("date")) {
-    return <Calendar className="w-3 h-3 text-amber-400/80" />;
+    return <Calendar className="w-3 h-3 text-amber-600 dark:text-amber-400/80" />;
   }
   if (lower.includes("bool")) {
-    return <ToggleLeft className="w-3 h-3 text-purple-400/80" />;
+    return <ToggleLeft className="w-3 h-3 text-purple-600 dark:text-purple-400/80" />;
   }
-  return <FileText className="w-3 h-3 text-zinc-400/80" />;
+  return <FileText className="w-3 h-3 text-slate-400 dark:text-zinc-400/80" />;
 }
 
 interface ColumnRowProps {
@@ -30,15 +30,15 @@ interface ColumnRowProps {
 
 function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps) {
   return (
-    <div className="relative group/col flex items-center justify-between px-3 py-1.5 hover:bg-zinc-800/60 transition-colors border-b border-zinc-800/40 last:border-b-0 text-xs">
+    <div className="relative group/col flex items-center justify-between px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-zinc-800/60 transition-colors border-b border-slate-100 dark:border-zinc-800/40 last:border-b-0 text-xs">
       {/* Handle Izquierdo (Target): solo visible si está conectado o al pasar el cursor */}
       <Handle
         type="target"
         position={Position.Left}
         id={`${column.name}-target`}
-        className={`!w-2 !h-2 !-left-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+        className={`!w-2 !h-2 !-left-1 !bg-indigo-500 dark:!bg-indigo-400 !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
           isLeftConnected
-            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(99,102,241,0.6)] dark:shadow-[0_0_6px_rgba(129,140,248,0.8)]"
             : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
         }`}
       />
@@ -47,7 +47,7 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
       <div className="flex items-center gap-2 min-w-0 pr-2">
         {column.pk ? (
           <span title="Primary Key">
-            <Key className="w-3.5 h-3.5 text-amber-400 shrink-0 fill-amber-400/20" />
+            <Key className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0 fill-amber-500/20 dark:fill-amber-400/20" />
           </span>
         ) : (
           <span className="shrink-0">{getTypeIcon(column.type)}</span>
@@ -55,7 +55,7 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
 
         <span
           className={`truncate font-medium ${
-            column.pk ? "text-zinc-100 font-semibold" : "text-zinc-300"
+            column.pk ? "text-slate-900 dark:text-zinc-100 font-semibold" : "text-slate-700 dark:text-zinc-300"
           }`}
         >
           {column.name}
@@ -64,7 +64,7 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
 
       {/* Tipo de dato y Constraints */}
       <div className="flex items-center gap-1.5 shrink-0">
-        <span className="font-mono text-[11px] text-zinc-400 bg-zinc-950/60 px-1.5 py-0.5 rounded border border-zinc-800/50">
+        <span className="font-mono text-[11px] text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-950/60 px-1.5 py-0.5 rounded border border-slate-200 dark:border-zinc-800/50">
           {column.type}
         </span>
 
@@ -75,13 +75,13 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
         )}
 
         {column.unique && !column.pk && (
-          <span className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30">
+          <span className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/30">
             UQ
           </span>
         )}
 
         {column.notNull && !column.pk && (
-          <span className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-zinc-800 text-zinc-400">
+          <span className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 border border-slate-200 dark:border-transparent">
             NN
           </span>
         )}
@@ -92,9 +92,9 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
         type="source"
         position={Position.Right}
         id={`${column.name}-source`}
-        className={`!w-2 !h-2 !-right-1 !bg-indigo-400 !border-2 !border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+        className={`!w-2 !h-2 !-right-1 !bg-indigo-500 dark:!bg-indigo-400 !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
           isRightConnected
-            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(99,102,241,0.6)] dark:shadow-[0_0_6px_rgba(129,140,248,0.8)]"
             : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
         }`}
       />
@@ -125,10 +125,10 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
 
   return (
     <div
-      className={`rounded-lg bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] shadow-2xl ${
+      className={`rounded-lg bg-white dark:bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] shadow-xl dark:shadow-2xl ${
         selected
           ? "border-indigo-500 ring-2 ring-indigo-500/30 shadow-indigo-500/10"
-          : "border-zinc-800 hover:border-zinc-700"
+          : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
       }`}
     >
       {/* Barra superior de acento de color */}
@@ -138,20 +138,20 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
       />
 
       {/* Encabezado de la tabla */}
-      <div className="flex items-center justify-between px-3 py-2 bg-zinc-950/70 border-b border-zinc-800">
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-50/90 dark:bg-zinc-950/70 border-b border-slate-200 dark:border-zinc-800">
         <div className="flex items-center gap-2 min-w-0">
-          <Database className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
-          <span className="font-semibold text-xs tracking-wide text-zinc-100 truncate">
+          <Database className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-400 shrink-0" />
+          <span className="font-semibold text-xs tracking-wide text-slate-900 dark:text-zinc-100 truncate">
             {data.label}
           </span>
           {data.schema && (
-            <span className="text-[10px] text-zinc-500 font-mono">
+            <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
               ({data.schema})
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[10px] text-zinc-400 font-mono bg-zinc-800/80 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-slate-600 dark:text-zinc-400 font-mono bg-slate-200/70 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded">
             {data.columns.length} cols
           </span>
           <button
@@ -160,7 +160,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
               e.stopPropagation();
               openEditTableModal(data);
             }}
-            className="p-0.5 rounded text-zinc-400 hover:text-indigo-400 hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
+            className="p-0.5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:text-indigo-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
             title="Editar características de la tabla"
           >
             <Settings className="w-3.5 h-3.5" />
@@ -171,7 +171,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
       {/* Lista de columnas */}
       <div className="py-1">
         {data.columns.length === 0 ? (
-          <div className="px-3 py-2 text-center text-zinc-500 text-xs italic">
+          <div className="px-3 py-2 text-center text-slate-400 dark:text-zinc-500 text-xs italic">
             Sin columnas definidas
           </div>
         ) : (
