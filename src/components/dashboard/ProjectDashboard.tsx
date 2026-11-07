@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Database, Trash2, ArrowRight, Layers, Sparkles, ChevronDown, Check } from "lucide-react";
+import { Plus, Database, Trash2, ArrowRight, Sparkles, ChevronDown, Check } from "lucide-react";
 import { getProjects, createProject, deleteProject, type Project } from "@/db/database";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
@@ -90,9 +90,7 @@ export function ProjectDashboard() {
       {/* Barra de navegación superior */}
       <nav className="h-14 border-b border-slate-200 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/60 backdrop-blur px-8 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-indigo-600 text-white shadow-sm">
-            <Layers className="w-5 h-5" />
-          </div>
+          <img src="/logo.png" alt="Power Diagram" className="w-7 h-7 rounded-lg object-contain shadow-sm" />
           <div>
             <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-zinc-100">Power Diagram</h1>
             <span className="text-[10px] text-slate-500 dark:text-zinc-400">ERD Studio & SQL Architect</span>
