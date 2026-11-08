@@ -21,10 +21,10 @@ export function DbmlEditor() {
     <div className="flex flex-col h-full bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800 transition-colors">
       {/* Header del Editor */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 shrink-0">
-        <div className="flex items-center gap-2">
-          <Code2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-          <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200">Editor DBML</span>
-          <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono">
+        <div className="flex items-center gap-2 min-w-0 pr-2">
+          <Code2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+          <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 shrink-0">Editor DBML</span>
+          <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono truncate">
             ({nodes.length} tablas, {edges.length} relaciones)
           </span>
         </div>
@@ -51,41 +51,43 @@ export function DbmlEditor() {
       </div>
 
       {/* Área del editor de código */}
-      <div className="flex-1 overflow-auto bg-white dark:bg-zinc-950 text-sm">
-        <CodeMirror
-          value={dbmlCode}
-          height="100%"
-          theme={resolvedTheme}
-          extensions={[sql()]}
-          onChange={(val) => setDbmlCode(val)}
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: true,
-            highlightSpecialChars: true,
-            history: true,
-            foldGutter: true,
-            drawSelection: true,
-            dropCursor: true,
-            allowMultipleSelections: true,
-            indentOnInput: true,
-            syntaxHighlighting: true,
-            bracketMatching: true,
-            closeBrackets: true,
-            autocompletion: true,
-            rectangularSelection: true,
-            crosshairCursor: true,
-            highlightActiveLine: true,
-            highlightSelectionMatches: true,
-            closeBracketsKeymap: true,
-            defaultKeymap: true,
-            searchKeymap: true,
-            historyKeymap: true,
-            foldKeymap: true,
-            completionKeymap: true,
-            lintKeymap: true,
-          }}
-          className="text-[13px] font-mono h-full"
-        />
+      <div className="flex-1 min-h-0 relative bg-white dark:bg-zinc-950 text-sm overflow-hidden">
+        <div className="absolute inset-0">
+          <CodeMirror
+            value={dbmlCode}
+            height="100%"
+            theme={resolvedTheme}
+            extensions={[sql()]}
+            onChange={(val) => setDbmlCode(val)}
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: true,
+              highlightSpecialChars: true,
+              history: true,
+              foldGutter: true,
+              drawSelection: true,
+              dropCursor: true,
+              allowMultipleSelections: true,
+              indentOnInput: true,
+              syntaxHighlighting: true,
+              bracketMatching: true,
+              closeBrackets: true,
+              autocompletion: true,
+              rectangularSelection: true,
+              crosshairCursor: true,
+              highlightActiveLine: true,
+              highlightSelectionMatches: true,
+              closeBracketsKeymap: true,
+              defaultKeymap: true,
+              searchKeymap: true,
+              historyKeymap: true,
+              foldKeymap: true,
+              completionKeymap: true,
+              lintKeymap: true,
+            }}
+            className="text-[13px] font-mono h-full [&_.cm-editor]:h-full [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
+          />
+        </div>
       </div>
 
       {/* Banner de error de sintaxis no bloqueante */}

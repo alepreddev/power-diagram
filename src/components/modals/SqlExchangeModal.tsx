@@ -108,7 +108,7 @@ export function SqlExchangeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 flex flex-col max-h-[90vh]">
+      <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl h-[85vh] max-h-[820px] min-h-[520px] bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 flex flex-col overflow-hidden">
         {/* Cabecera espaciosa con margen derecho para no chocar con el botón cerrar */}
         <DialogHeader className="shrink-0 pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -156,7 +156,7 @@ export function SqlExchangeModal({
             PESTAÑA: EXPORTAR SQL
            ======================================================== */}
         {activeTab === "export" ? (
-          <div className="flex flex-col flex-1 overflow-hidden space-y-3 pt-3">
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden space-y-3 pt-3">
             {/* Barra de configuración y acciones */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 p-2.5 rounded-lg shrink-0">
               <div className="flex items-center gap-2.5">
@@ -208,23 +208,25 @@ export function SqlExchangeModal({
               </div>
             </div>
 
-            {/* Visor de código SQL */}
-            <div className="flex-1 min-h-[360px] border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
-              <CodeMirror
-                value={exportedSql}
-                height="100%"
-                theme={resolvedTheme}
-                extensions={[sql()]}
-                editable={false}
-                className="text-[13px] font-mono h-full"
-              />
+            {/* Visor de código SQL con scrollbar vertical y horizontal garantizados */}
+            <div className="flex-1 min-h-0 relative border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
+              <div className="absolute inset-0">
+                <CodeMirror
+                  value={exportedSql}
+                  height="100%"
+                  theme={resolvedTheme}
+                  extensions={[sql()]}
+                  editable={false}
+                  className="text-[13px] font-mono h-full [&_.cm-editor]:h-full [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
+                />
+              </div>
             </div>
           </div>
         ) : (
           /* ========================================================
              PESTAÑA: IMPORTAR SQL (Ingeniería Inversa)
              ======================================================== */
-          <div className="flex flex-col flex-1 overflow-hidden space-y-3 pt-3">
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden space-y-3 pt-3">
             {/* Barra de opciones de importación */}
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 p-2.5 rounded-lg shrink-0">
               <div className="flex items-center gap-2.5">
@@ -281,17 +283,19 @@ export function SqlExchangeModal({
               </div>
             </div>
 
-            {/* Input de código SQL */}
-            <div className="flex-1 min-h-[300px] border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
-              <CodeMirror
-                value={inputSql}
-                height="100%"
-                theme={resolvedTheme}
-                placeholder="Pega aquí tus instrucciones SQL (ej: CREATE TABLE users (...); o ALTER TABLE ...)"
-                extensions={[sql()]}
-                onChange={(val) => setInputSql(val)}
-                className="text-[13px] font-mono h-full"
-              />
+            {/* Input de código SQL con scrollbar vertical y horizontal garantizados */}
+            <div className="flex-1 min-h-0 relative border border-slate-300 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-950 shadow-inner">
+              <div className="absolute inset-0">
+                <CodeMirror
+                  value={inputSql}
+                  height="100%"
+                  theme={resolvedTheme}
+                  placeholder="Pega aquí tus instrucciones SQL (ej: CREATE TABLE users (...); o ALTER TABLE ...)"
+                  extensions={[sql()]}
+                  onChange={(val) => setInputSql(val)}
+                  className="text-[13px] font-mono h-full [&_.cm-editor]:h-full [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
+                />
+              </div>
             </div>
 
             {importError && (

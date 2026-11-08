@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { WorkspaceHeader } from "./WorkspaceHeader";
 import { DbmlEditor } from "@/components/editor/DbmlEditor";
@@ -7,8 +7,71 @@ import { EditTableModal } from "@/components/modals/EditTableModal";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/store/useDiagramStore";
 
+const MIN_EDITOR_WIDTH = 280;
+const DEFAULT_EDITOR_WIDTH = 420;
+
 export function Workspace() {
   const [isEditorOpen, setIsEditorOpen] = useState(true);
+  const [editorWidth, setEditorWidth] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem("power_diagram_editor_width");
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= MIN_EDITOR_WIDTH) {
+          return parsed;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_EDITOR_WIDTH;
+  });
+  const [isResizing, setIsResizing] = useState(false);
+  const isResizingRef = useRef(false);
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+    isResizingRef.current = true;
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    if (isResizingRef.current) {
+      setIsResizing(false);
+      isResizingRef.current = false;
+    }
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (!isResizingRef.current) return;
+    const maxWidth = Math.min(window.innerWidth * 0.75, 900);
+    const newWidth = Math.min(Math.max(e.clientX, MIN_EDITOR_WIDTH), maxWidth);
+    setEditorWidth(newWidth);
+    try {
+      localStorage.setItem("power_diagram_editor_width", newWidth.toString());
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const resetWidth = useCallback(() => {
+    setEditorWidth(DEFAULT_EDITOR_WIDTH);
+    try {
+      localStorage.setItem("power_diagram_editor_width", DEFAULT_EDITOR_WIDTH.toString());
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   const { editingTable, closeEditTableModal } = useDiagramStore();
 
   return (
@@ -20,12 +83,41 @@ export function Workspace() {
       <div className="flex-1 flex relative overflow-hidden">
         {/* Panel lateral del Editor de Código */}
         <div
-          className={`h-full transition-all duration-200 ease-in-out shrink-0 relative ${
-            isEditorOpen ? "w-[420px] max-w-[50vw]" : "w-0 overflow-hidden"
-          }`}
+          style={{ width: isEditorOpen ? `${editorWidth}px` : 0 }}
+          className={`h-full shrink-0 relative ${
+            isResizing
+              ? "transition-none select-none"
+              : "transition-[width] duration-200 ease-in-out"
+          } ${!isEditorOpen ? "overflow-hidden" : ""}`}
         >
           {isEditorOpen && <DbmlEditor />}
+
+          {/* Tirador dinámico para ajustar el ancho (Resize Handle) */}
+          {isEditorOpen && (
+            <div
+              onMouseDown={startResizing}
+              onDoubleClick={resetWidth}
+              className={`absolute top-0 -right-1 w-2 h-full cursor-col-resize z-30 group hover:bg-indigo-500/20 active:bg-indigo-500/40 transition-colors ${
+                isResizing ? "bg-indigo-500/30" : ""
+              }`}
+              title="Arrastra para ajustar el ancho (Doble clic para restaurar)"
+            >
+              {/* Línea indicadora visual sobre el borde */}
+              <div
+                className={`absolute top-0 right-1 w-[2px] h-full transition-colors ${
+                  isResizing
+                    ? "bg-indigo-500 shadow-sm"
+                    : "bg-transparent group-hover:bg-indigo-400/80"
+                }`}
+              />
+            </div>
+          )}
         </div>
+
+        {/* Capa de protección invisible durante el arrastre para evitar interferencia del lienzo */}
+        {isResizing && (
+          <div className="fixed inset-0 z-50 cursor-col-resize select-none" />
+        )}
 
         {/* Botón flotante para colapsar/expandir el editor */}
         <Button
