@@ -86,7 +86,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-xl sm:max-w-xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6">
+      <DialogContent className="w-[92vw] max-w-xl sm:max-w-xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
@@ -103,7 +103,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 py-2">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-3">
           {/* Nombre del proyecto */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">

@@ -83,7 +83,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6">
+      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-2 border-b border-slate-200 dark:border-zinc-800/80">
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
@@ -96,7 +96,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 py-2">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           {/* Nombre y Color */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
             <div className="sm:col-span-8 space-y-1.5">

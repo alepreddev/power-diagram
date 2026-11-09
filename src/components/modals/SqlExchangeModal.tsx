@@ -108,7 +108,7 @@ export function SqlExchangeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl h-[85vh] max-h-[820px] min-h-[520px] bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 flex flex-col overflow-hidden">
+      <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl h-[85vh] max-h-[820px] min-h-[520px] bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5 flex flex-col overflow-hidden">
         {/* Cabecera espaciosa con margen derecho para no chocar con el botón cerrar */}
         <DialogHeader className="shrink-0 pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
