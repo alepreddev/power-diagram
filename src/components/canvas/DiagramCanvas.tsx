@@ -11,6 +11,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { Sparkles, ZoomIn } from "lucide-react";
 import { TableNodeMemo } from "./TableNode";
+import { RelationshipEdgeMemo } from "./RelationshipEdge";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { layoutDiagramWithElk } from "@/lib/autoLayout";
@@ -23,6 +24,7 @@ function CanvasContent() {
   const { fitView } = useReactFlow();
 
   const nodeTypes = useMemo(() => ({ table: TableNodeMemo }), []);
+  const edgeTypes = useMemo(() => ({ relation: RelationshipEdgeMemo }), []);
 
   const isDark = resolvedTheme === "dark";
 
@@ -45,13 +47,14 @@ function CanvasContent() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         minZoom={0.15}
         maxZoom={2}
         colorMode={resolvedTheme}
         className={resolvedTheme}
         defaultEdgeOptions={{
-          type: "smoothstep",
+          type: "relation",
           style: { stroke: isDark ? "#64748b" : "#475569", strokeWidth: 1.5 },
         }}
         proOptions={{ hideAttribution: true }}
