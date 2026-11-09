@@ -72,7 +72,18 @@ export function Workspace() {
     };
   }, [resize, stopResizing]);
 
-  const { editingTable, closeEditTableModal } = useDiagramStore();
+  const { editingTable, closeEditTableModal, saveToDatabase } = useDiagramStore();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveToDatabase();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [saveToDatabase]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 transition-colors">
