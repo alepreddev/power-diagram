@@ -155,6 +155,7 @@ export function parseDbmlToGraph(
 
         edges.push({
           id: edgeId,
+          type: "relation",
           source: sourceTable,
           target: targetTable,
           sourceHandle: `${sourceCol}-source`,
@@ -326,5 +327,54 @@ export function appendRefToDbml(
 ): string {
   const refLine = `\nRef: ${sourceTable}.${sourceCol} ${relation} ${targetTable}.${targetCol}\n`;
   return `${currentDbml.trimEnd()}\n${refLine}`;
+}
+
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Elimina quirúrgicamente una relación específica (Ref) entre dos tablas y columnas del código DBML.
+ * Contempla relaciones directas, invertidas e inline en definiciones de columnas.
+ */
+export function removeRefFromDbml(
+  currentDbml: string,
+  sourceTable: string,
+  sourceCol: string,
+  targetTable: string,
+  targetCol: string
+): string {
+  const sTable = escapeRegExp(sourceTable);
+  const sCol = escapeRegExp(sourceCol);
+  const tTable = escapeRegExp(targetTable);
+  const tCol = escapeRegExp(targetCol);
+
+  // 1. Directiva Ref: fuente -> destino
+  const refRegex1 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?.*$\\n?`,
+    "gmi"
+  );
+
+  // 2. Directiva Ref: destino -> fuente
+  const refRegex2 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?.*$\\n?`,
+    "gmi"
+  );
+
+  let updated = currentDbml.replace(refRegex1, "").replace(refRegex2, "");
+
+  // 3. Inline ref en definición de columnas
+  const inlineRefRegex1 = new RegExp(
+    `(?:,\\s*)?ref\\s*:\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?(?:\\s*,)?`,
+    "gi"
+  );
+  const inlineRefRegex2 = new RegExp(
+    `(?:,\\s*)?ref\\s*:\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?(?:\\s*,)?`,
+    "gi"
+  );
+
+  updated = updated.replace(inlineRefRegex1, "").replace(inlineRefRegex2, "");
+
+  return updated.trimEnd() + "\n";
 }
 

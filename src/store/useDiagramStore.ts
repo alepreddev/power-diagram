@@ -10,6 +10,7 @@ import {
   parseDbmlToGraph,
   appendTableToDbml,
   appendRefToDbml,
+  removeRefFromDbml,
   updateTableInDbml,
   removeTableFromDbml,
   type TableNode,
@@ -93,6 +94,7 @@ interface DiagramState {
     note?: string
   ) => void;
   deleteTable: (tableName: string) => void;
+  deleteEdge: (edgeId: string) => void;
   saveToDatabase: () => Promise<void>;
   setNodes: (nodes: TableNode[]) => void;
   setEdges: (edges: TableEdge[]) => void;
@@ -204,8 +206,64 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     },
 
     onEdgesChange: (changes) => {
+      // Manejar la eliminación de relaciones (Supr o Backspace sobre la arista)
+      const removedChanges = changes.filter((c) => c.type === "remove");
+      if (removedChanges.length > 0) {
+        let currentCode = get().dbmlCode;
+        for (const change of removedChanges) {
+          const edge = get().edges.find((e) => e.id === change.id);
+          if (edge) {
+            const sourceTable = edge.source;
+            const targetTable = edge.target;
+            const sourceCol =
+              (edge.data?.sourceColumn as string) ||
+              (edge.sourceHandle ? edge.sourceHandle.replace(/-source|-target/, "") : "");
+            const targetCol =
+              (edge.data?.targetColumn as string) ||
+              (edge.targetHandle ? edge.targetHandle.replace(/-source|-target/, "") : "");
+
+            if (sourceTable && targetTable && sourceCol && targetCol) {
+              currentCode = removeRefFromDbml(
+                currentCode,
+                sourceTable,
+                sourceCol,
+                targetTable,
+                targetCol
+              );
+            }
+          }
+        }
+        get().setDbmlCode(currentCode);
+        return;
+      }
+
       const updatedEdges = applyEdgeChanges(changes, get().edges);
       set({ edges: updatedEdges });
+    },
+
+    deleteEdge: (edgeId: string) => {
+      const edge = get().edges.find((e) => e.id === edgeId);
+      if (!edge) return;
+
+      const sourceTable = edge.source;
+      const targetTable = edge.target;
+      const sourceCol =
+        (edge.data?.sourceColumn as string) ||
+        (edge.sourceHandle ? edge.sourceHandle.replace(/-source|-target/, "") : "");
+      const targetCol =
+        (edge.data?.targetColumn as string) ||
+        (edge.targetHandle ? edge.targetHandle.replace(/-source|-target/, "") : "");
+
+      if (sourceTable && targetTable && sourceCol && targetCol) {
+        const updatedDbml = removeRefFromDbml(
+          get().dbmlCode,
+          sourceTable,
+          sourceCol,
+          targetTable,
+          targetCol
+        );
+        get().setDbmlCode(updatedDbml);
+      }
     },
 
     onConnect: (connection: Connection) => {
