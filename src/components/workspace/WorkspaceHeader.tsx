@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   ArrowLeft,
   Loader2,
@@ -8,6 +8,7 @@ import {
   FileCode2,
   Upload,
   Image as ImageIcon,
+  Check,
 } from "lucide-react";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
@@ -32,13 +33,28 @@ export function WorkspaceHeader() {
     tab: "export",
   });
   const [isExportingImage, setIsExportingImage] = useState(false);
+  const [imageExported, setImageExported] = useState(false);
+  const exportFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (exportFeedbackTimer.current) {
+        clearTimeout(exportFeedbackTimer.current);
+      }
+    };
+  }, []);
 
   if (!activeProject) return null;
 
   const handleExportImage = async (format: "png" | "svg") => {
     try {
       setIsExportingImage(true);
-      await exportDiagramImage(nodes, format, activeProject.name);
+      const saved = await exportDiagramImage(nodes, format, activeProject.name);
+      if (saved) {
+        setImageExported(true);
+        if (exportFeedbackTimer.current) clearTimeout(exportFeedbackTimer.current);
+        exportFeedbackTimer.current = setTimeout(() => setImageExported(false), 2000);
+      }
     } catch (err) {
       console.error("Error al exportar imagen:", err);
       alert(err instanceof Error ? err.message : "Error al generar la imagen");
@@ -131,10 +147,18 @@ export function WorkspaceHeader() {
             disabled={isExportingImage || nodes.length === 0}
             onClick={() => handleExportImage("png")}
             className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200"
-            title="Descargar diagrama en imagen PNG de alta resolución"
+            title="Exportar diagrama como imagen PNG de alta resolución"
           >
-            <ImageIcon className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
-            <span className="hidden md:inline">PNG</span>
+            {isExportingImage ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500 dark:text-purple-400" />
+            ) : imageExported ? (
+              <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+            ) : (
+              <ImageIcon className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
+            )}
+            <span className="hidden md:inline">
+              {isExportingImage ? "Exportando..." : imageExported ? "Guardado" : "PNG"}
+            </span>
           </Button>
 
           <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />

@@ -1,4 +1,5 @@
 import { exporter, importer } from "@dbml/core";
+import { saveFileCrossPlatform } from "./fileSave";
 
 export type ExportDialect = "postgres" | "mysql" | "mssql" | "sqlite" | "json";
 export type ImportDialect = "postgres" | "mysql" | "mssql";
@@ -43,17 +44,21 @@ export function importSqlToDbml(sqlCode: string, dialect: ImportDialect): string
 }
 
 /**
- * Descarga un texto como archivo en el navegador del usuario.
+ * Guarda o descarga un archivo de texto usando el diálogo nativo en Tauri o Blob en web.
  */
-export function downloadTextFile(filename: string, content: string, mimeType = "text/plain") {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+export async function downloadTextFile(
+  filename: string,
+  content: string,
+  mimeType = "text/plain"
+): Promise<boolean> {
+  const ext = filename.includes(".") ? filename.split(".").pop() || "txt" : "txt";
+  const filterName = ext === "json" ? "Archivo JSON" : ext === "sql" ? "Script SQL" : "Archivo de texto";
+
+  return saveFileCrossPlatform(content, {
+    defaultFilename: filename,
+    filterName,
+    extensions: [ext],
+    mimeType,
+  });
 }
 

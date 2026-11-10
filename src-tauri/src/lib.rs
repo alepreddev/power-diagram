@@ -7,6 +7,20 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+fn write_file_bytes(path: &str, bytes: &[u8]) -> Result<(), String> {
+    std::fs::write(path, bytes).map_err(|e| format!("No se pudo guardar el archivo '{}': {}", path, e))
+}
+
+#[tauri::command]
+fn save_binary_file(path: String, contents: Vec<u8>) -> Result<(), String> {
+    write_file_bytes(&path, &contents)
+}
+
+#[tauri::command]
+fn save_text_file(path: String, contents: String) -> Result<(), String> {
+    write_file_bytes(&path, contents.as_bytes())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let migrations = vec![
@@ -48,7 +62,8 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![greet, save_binary_file, save_text_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

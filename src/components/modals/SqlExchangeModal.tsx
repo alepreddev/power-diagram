@@ -66,12 +66,17 @@ export function SqlExchangeModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const ext = exportDialect === "json" ? "json" : "sql";
     const filename = `${(activeProject?.name || "diagram")
       .toLowerCase()
       .replace(/\s+/g, "_")}_${exportDialect}.${ext}`;
-    downloadTextFile(filename, exportedSql, "text/plain");
+    try {
+      await downloadTextFile(filename, exportedSql, "text/plain");
+    } catch (err) {
+      console.error("Error al guardar archivo:", err);
+      alert(err instanceof Error ? err.message : "Error al guardar el archivo");
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
