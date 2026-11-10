@@ -82,6 +82,18 @@ export async function deleteProject(id: number): Promise<void> {
   await db.execute("DELETE FROM projects WHERE id = $1;", [id]);
 }
 
+export async function updateProject(
+  id: number,
+  name: string,
+  dbEngine: string
+): Promise<void> {
+  const db = await getDb();
+  await db.execute(
+    "UPDATE projects SET name = $1, db_engine = $2 WHERE id = $3;",
+    [name, dbEngine, id]
+  );
+}
+
 export async function getDiagramByProjectId(projectId: number): Promise<Diagram | null> {
   const db = await getDb();
   const rows = await db.select<Diagram[]>(
