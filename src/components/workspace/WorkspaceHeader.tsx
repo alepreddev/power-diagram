@@ -201,7 +201,8 @@ export function WorkspaceHeader() {
       <SqlExchangeModal
         open={sqlModal.open}
         onOpenChange={(open) => setSqlModal((prev) => ({ ...prev, open }))}
-        defaultTab={sqlModal.tab}
+        activeTab={sqlModal.tab}
+        onTabChange={(tab) => setSqlModal((prev) => ({ ...prev, tab }))}
       />
     </>
   );

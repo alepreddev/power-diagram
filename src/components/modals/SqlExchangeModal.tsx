@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import {
@@ -33,17 +33,31 @@ interface SqlExchangeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultTab?: "export" | "import";
+  activeTab?: "export" | "import";
+  onTabChange?: (tab: "export" | "import") => void;
 }
 
 export function SqlExchangeModal({
   open,
   onOpenChange,
   defaultTab = "export",
+  activeTab: controlledTab,
+  onTabChange,
 }: SqlExchangeModalProps) {
   const { dbmlCode, setDbmlCode, activeProject } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
 
-  const [activeTab, setActiveTab] = useState<"export" | "import">(defaultTab);
+  const [internalTab, setInternalTab] = useState<"export" | "import">(defaultTab);
+  const activeTab = controlledTab ?? internalTab;
+
+  const setActiveTab = (tab: "export" | "import") => {
+    if (onTabChange) {
+      onTabChange(tab);
+    } else {
+      setInternalTab(tab);
+    }
+  };
+
   const [exportDialect, setExportDialect] = useState<ExportDialect>("postgres");
   const [importDialect, setImportDialect] = useState<ImportDialect>("postgres");
   const [inputSql, setInputSql] = useState("");
@@ -51,14 +65,25 @@ export function SqlExchangeModal({
   const [importError, setImportError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Generar el SQL exportado de forma reactiva
+  // Sincroniza la pestaña inicial y limpia errores previos cada vez que se abre la modal
+  useEffect(() => {
+    if (open) {
+      if (!controlledTab) {
+        setInternalTab(defaultTab);
+      }
+      setImportError(null);
+    }
+  }, [open, defaultTab, controlledTab]);
+
+  // Generar el SQL exportado de forma reactiva solo cuando la pestaña Exportar está visible
   const exportedSql = useMemo(() => {
+    if (!open || activeTab !== "export") return "";
     try {
       return exportDbmlToSql(dbmlCode, exportDialect);
     } catch (err: unknown) {
       return `-- Error al exportar: ${err instanceof Error ? err.message : String(err)}`;
     }
-  }, [dbmlCode, exportDialect]);
+  }, [open, activeTab, dbmlCode, exportDialect]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(exportedSql);
@@ -89,6 +114,7 @@ export function SqlExchangeModal({
       if (content) setInputSql(content);
     };
     reader.readAsText(file);
+    e.target.value = "";
   };
 
   const handleImportSubmit = () => {
