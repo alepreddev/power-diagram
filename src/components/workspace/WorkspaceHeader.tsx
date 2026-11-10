@@ -118,16 +118,6 @@ export function WorkspaceHeader() {
           <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
           {/* Botones de Exportar/Importar SQL */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setSqlModal({ open: true, tab: "import" })}
-            className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200"
-            title="Importar script SQL existente (Ingeniería inversa)"
-          >
-            <Upload className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-            <span className="hidden md:inline">Importar SQL</span>
-          </Button>
 
           <Button
             variant="outline"
@@ -138,6 +128,17 @@ export function WorkspaceHeader() {
           >
             <FileCode2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
             <span className="hidden md:inline">Exportar SQL</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSqlModal({ open: true, tab: "import" })}
+            className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200"
+            title="Importar script SQL existente (Ingeniería inversa)"
+          >
+            <Upload className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
+            <span className="hidden md:inline">Importar SQL</span>
           </Button>
 
           {/* Exportar a Imagen */}

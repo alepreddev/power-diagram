@@ -62,7 +62,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className="h-9 px-5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md gap-1.5"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            {/* <Trash2 className="w-3.5 h-3.5" /> */}
             <span>{isConfirming ? "Eliminando..." : confirmLabel}</span>
           </Button>
         </DialogFooter>

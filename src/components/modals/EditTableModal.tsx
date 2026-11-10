@@ -320,7 +320,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
       onOpenChange={setIsDeleteConfirmOpen}
       title="Eliminar Tabla"
       description={`¿Estás seguro de que deseas eliminar la tabla "${tableData.label}" y todas sus relaciones del diagrama?`}
-      confirmLabel="Eliminar Tabla"
+      confirmLabel="Eliminar"
       onConfirm={handleConfirmDelete}
     />
     </>

@@ -222,7 +222,7 @@ export function ProjectDashboard() {
         }}
         title="Eliminar Base de Datos"
         description={`¿Estás seguro de que deseas eliminar "${deletingProject?.name ?? ""}" y su diagrama? Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar Proyecto"
+        confirmLabel="Eliminar"
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
       />
