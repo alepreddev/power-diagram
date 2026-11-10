@@ -283,9 +283,8 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
             <Button
               type="button"
               variant="ghost"
-              size="sm"
               onClick={handleDelete}
-              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-500/10 gap-1.5 self-start sm:self-auto"
+              className="h-9 px-3.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-500/10 gap-1.5 self-start sm:self-auto"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Eliminar Tabla</span>
@@ -295,16 +294,15 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
                 onClick={() => onOpenChange(false)}
-                className="text-xs text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={!tableName.trim()}
-                className="h-8 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+                className="h-9 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
               >
                 Guardar Cambios
               </Button>
