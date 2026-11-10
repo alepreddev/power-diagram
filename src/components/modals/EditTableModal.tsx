@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDiagramStore } from "@/store/useDiagramStore";
+import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
 import type { ColumnData, TableNodeData } from "@/lib/dbmlParser";
 
 interface EditTableModalProps {
@@ -46,6 +47,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
   const [headerColor, setHeaderColor] = useState(COLOR_PRESETS[0].value);
   const [note, setNote] = useState("");
   const [columns, setColumns] = useState<ColumnData[]>([]);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Sincronizar datos cada vez que se selecciona una tabla para editar
   useEffect(() => {
@@ -59,7 +61,8 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
           : [{ name: "id", type: "integer", pk: true, unique: false, notNull: true, increment: true }]
       );
     }
-  }, [tableData]);
+    setIsDeleteConfirmOpen(false);
+  }, [tableData, open]);
 
   if (!tableData) return null;
 
@@ -98,18 +101,18 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
   };
 
   const handleDelete = () => {
-    if (
-      confirm(
-        `¿Estás seguro de que deseas eliminar la tabla "${tableData.label}" y sus relaciones?`
-      )
-    ) {
-      deleteTable(tableData.label);
-      onOpenChange(false);
-    }
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteTable(tableData.label);
+    setIsDeleteConfirmOpen(false);
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
           <div className="flex items-center gap-2">
@@ -311,5 +314,15 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
         </form>
       </DialogContent>
     </Dialog>
+
+    <ConfirmDialog
+      open={isDeleteConfirmOpen}
+      onOpenChange={setIsDeleteConfirmOpen}
+      title="Eliminar Tabla"
+      description={`¿Estás seguro de que deseas eliminar la tabla "${tableData.label}" y todas sus relaciones del diagrama?`}
+      confirmLabel="Eliminar Tabla"
+      onConfirm={handleConfirmDelete}
+    />
+    </>
   );
 }

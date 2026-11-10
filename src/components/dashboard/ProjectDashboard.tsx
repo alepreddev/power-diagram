@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { CreateProjectModal } from "@/components/modals/CreateProjectModal";
 import { EditProjectModal } from "@/components/modals/EditProjectModal";
+import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
 
 export function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deletingProject, setDeletingProject] = useState<Project | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { setActiveProject } = useDiagramStore();
 
@@ -43,11 +46,17 @@ export function ProjectDashboard() {
     setEditingProject(null);
   };
 
-  const handleDelete = async (id: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm("¿Estás seguro de que deseas eliminar este proyecto y su diagrama?")) {
-      await deleteProject(id);
-      await loadProjects();
+  const handleConfirmDelete = async () => {
+    if (!deletingProject || isDeleting) return;
+    try {
+      setIsDeleting(true);
+      await deleteProject(deletingProject.id);
+      setProjects((prev) => prev.filter((p) => p.id !== deletingProject.id));
+      setDeletingProject(null);
+    } catch (err) {
+      console.error("Error al eliminar proyecto:", err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -151,7 +160,10 @@ export function ProjectDashboard() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={(e) => handleDelete(project.id, e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingProject(project);
+                          }}
                           className="h-7 w-7 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded"
                           title="Eliminar proyecto"
                         >
@@ -200,6 +212,19 @@ export function ProjectDashboard() {
         }}
         project={editingProject}
         onSuccess={handleProjectUpdated}
+      />
+
+      {/* Modal de Confirmación para Eliminar Proyecto */}
+      <ConfirmDialog
+        open={Boolean(deletingProject)}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setDeletingProject(null);
+        }}
+        title="Eliminar Base de Datos"
+        description={`¿Estás seguro de que deseas eliminar "${deletingProject?.name ?? ""}" y su diagrama? Esta acción no se puede deshacer.`}
+        confirmLabel="Eliminar Proyecto"
+        isConfirming={isDeleting}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );
