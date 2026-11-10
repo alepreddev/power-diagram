@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Trash2, ArrowRight, Pencil } from "lucide-react";
 import { getProjects, deleteProject, type Project } from "@/db/database";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { CreateProjectModal } from "@/components/modals/CreateProjectModal";
+import { EditProjectModal } from "@/components/modals/EditProjectModal";
 
 export function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
 
   const { setActiveProject } = useDiagramStore();
 
@@ -32,6 +34,13 @@ export function ProjectDashboard() {
   const handleProjectCreated = (newProject: Project) => {
     loadProjects();
     setActiveProject(newProject);
+  };
+
+  const handleProjectUpdated = (updatedProject: Project) => {
+    setProjects((prev) =>
+      prev.map((p) => (p.id === updatedProject.id ? updatedProject : p))
+    );
+    setEditingProject(null);
   };
 
   const handleDelete = async (id: number, e: React.MouseEvent) => {
@@ -126,15 +135,29 @@ export function ProjectDashboard() {
                       <span className={`text-[10px] uppercase font-mono font-bold px-2 py-0.5 rounded border ${getEngineBadgeColor(project.db_engine)}`}>
                         {project.db_engine}
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleDelete(project.id, e)}
-                        className="h-7 w-7 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded"
-                        title="Eliminar proyecto"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingProject(project);
+                          }}
+                          className="h-7 w-7 p-0 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:text-zinc-500 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/10 rounded"
+                          title="Editar proyecto"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleDelete(project.id, e)}
+                          className="h-7 w-7 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded"
+                          title="Eliminar proyecto"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
                     </div>
 
                     <h4 className="font-semibold text-sm text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
@@ -167,6 +190,16 @@ export function ProjectDashboard() {
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onSuccess={handleProjectCreated}
+      />
+
+      {/* Modal para Editar Base de Datos / Proyecto */}
+      <EditProjectModal
+        open={Boolean(editingProject)}
+        onOpenChange={(open) => {
+          if (!open) setEditingProject(null);
+        }}
+        project={editingProject}
+        onSuccess={handleProjectUpdated}
       />
     </div>
   );

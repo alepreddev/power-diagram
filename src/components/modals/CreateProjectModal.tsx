@@ -27,6 +27,65 @@ export const DB_ENGINES = [
 
 export type EngineType = (typeof DB_ENGINES)[number]["value"];
 
+interface ProjectFormFieldsProps {
+  name: string;
+  onNameChange: (value: string) => void;
+  engine: EngineType;
+  onEngineChange: (value: EngineType) => void;
+  placeholder?: string;
+}
+
+/** Campos compartidos para crear o editar un proyecto de base de datos. */
+export function ProjectFormFields({
+  name,
+  onNameChange,
+  engine,
+  onEngineChange,
+  placeholder = "ej. Sistema de Facturación, E-commerce, CRM Ventas",
+}: ProjectFormFieldsProps) {
+  return (
+    <>
+      {/* Nombre del proyecto */}
+      <div className="space-y-2.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+          Nombre del Proyecto / Base de Datos
+        </label>
+        <Input
+          placeholder={placeholder}
+          value={name}
+          onChange={(e) => onNameChange(e.target.value)}
+          className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-10 w-full shadow-sm"
+          autoFocus
+          required
+        />
+      </div>
+
+      {/* Selector de Motor de Base de Datos */}
+      <div className="space-y-2.5">
+        <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
+          Motor de Base de Datos
+        </label>
+        <div className="relative">
+          <select
+            value={engine}
+            onChange={(e) => onEngineChange(e.target.value as EngineType)}
+            className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs rounded-md px-3 pr-9 h-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm cursor-pointer appearance-none"
+          >
+            {DB_ENGINES.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-zinc-500">
+            <ChevronDown className="w-4 h-4" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProjectModalProps) {
   const [name, setName] = useState("");
   const [engine, setEngine] = useState<EngineType>("postgres");
@@ -76,43 +135,12 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 pt-3">
-          {/* Nombre del proyecto */}
-          <div className="space-y-2.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
-              Nombre del Proyecto / Base de Datos
-            </label>
-            <Input
-              placeholder="ej. Sistema de Facturación, E-commerce, CRM Ventas"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-10 w-full shadow-sm"
-              autoFocus
-              required
-            />
-          </div>
-
-          {/* Selector de Motor de Base de Datos */}
-          <div className="space-y-2.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
-              Motor de Base de Datos
-            </label>
-            <div className="relative">
-              <select
-                value={engine}
-                onChange={(e) => setEngine(e.target.value as EngineType)}
-                className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs rounded-md px-3 pr-9 h-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm cursor-pointer appearance-none"
-              >
-                {DB_ENGINES.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-zinc-500">
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            </div>
-          </div>
+          <ProjectFormFields
+            name={name}
+            onNameChange={setName}
+            engine={engine}
+            onEngineChange={setEngine}
+          />
 
           <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-zinc-800">
             <Button
