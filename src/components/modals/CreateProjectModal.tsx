@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Database, Plus, Check } from "lucide-react";
+import { Database, Plus, ChevronDown } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,38 +19,10 @@ interface CreateProjectModalProps {
 }
 
 export const DB_ENGINES = [
-  {
-    value: "postgres",
-    label: "PostgreSQL",
-    badge: "PG",
-    desc: "Relacional avanzado con soporte JSON y extensiones",
-    color: "text-sky-500 bg-sky-500/10 border-sky-500/30",
-    activeBorder: "border-sky-500 ring-1 ring-sky-500/30 bg-sky-50/50 dark:bg-sky-950/20",
-  },
-  {
-    value: "mysql",
-    label: "MySQL",
-    badge: "MY",
-    desc: "Rápido, confiable y ampliamente utilizado en la web",
-    color: "text-amber-500 bg-amber-500/10 border-amber-500/30",
-    activeBorder: "border-amber-500 ring-1 ring-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20",
-  },
-  {
-    value: "sqlite",
-    label: "SQLite",
-    badge: "SQ",
-    desc: "Embebido, sin servidor y ligero en un solo archivo",
-    color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
-    activeBorder: "border-emerald-500 ring-1 ring-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20",
-  },
-  {
-    value: "mssql",
-    label: "SQL Server",
-    badge: "MS",
-    desc: "Motor empresarial de Microsoft con soporte T-SQL",
-    color: "text-rose-500 bg-rose-500/10 border-rose-500/30",
-    activeBorder: "border-rose-500 ring-1 ring-rose-500/30 bg-rose-50/50 dark:bg-rose-950/20",
-  },
+  { value: "postgres", label: "PostgreSQL" },
+  { value: "mysql", label: "MySQL" },
+  { value: "sqlite", label: "SQLite" },
+  { value: "mssql", label: "SQL Server" },
 ] as const;
 
 export type EngineType = (typeof DB_ENGINES)[number]["value"];
@@ -86,7 +58,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-xl sm:max-w-xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+      <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400">
@@ -103,10 +75,10 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
           </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 pt-3">
+        <form onSubmit={handleSubmit} className="space-y-5 pt-3">
           {/* Nombre del proyecto */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+          <div className="space-y-2.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
               Nombre del Proyecto / Base de Datos
             </label>
             <Input
@@ -119,46 +91,26 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
             />
           </div>
 
-          {/* Selector de Motor de Base de Datos en cuadrícula */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
+          {/* Selector de Motor de Base de Datos */}
+          <div className="space-y-2.5">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
               Motor de Base de Datos
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {DB_ENGINES.map((item) => {
-                const isSelected = engine === item.value;
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setEngine(item.value)}
-                    className={`text-left p-3 rounded-lg border transition-all flex flex-col justify-between gap-1.5 cursor-pointer ${
-                      isSelected
-                        ? item.activeBorder
-                        : "border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-950/40 hover:bg-slate-100/70 dark:hover:bg-zinc-800/60"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border ${item.color}`}>
-                          {item.badge}
-                        </span>
-                        <span className="text-xs font-semibold text-slate-900 dark:text-zinc-100">
-                          {item.label}
-                        </span>
-                      </div>
-                      {isSelected && (
-                        <div className="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
-                      {item.desc}
-                    </p>
-                  </button>
-                );
-              })}
+            <div className="relative">
+              <select
+                value={engine}
+                onChange={(e) => setEngine(e.target.value as EngineType)}
+                className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs rounded-md px-3 pr-9 h-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm cursor-pointer appearance-none"
+              >
+                {DB_ENGINES.map((item) => (
+                  <option key={item.value} value={item.value}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-zinc-500">
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </div>
           </div>
 
@@ -166,9 +118,8 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
             <Button
               type="button"
               variant="ghost"
-              size="sm"
               onClick={() => onOpenChange(false)}
-              className="text-xs text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
             >
               Cancelar
             </Button>
