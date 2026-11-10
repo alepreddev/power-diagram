@@ -238,22 +238,22 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-3 pt-3 border-t border-slate-200 dark:border-zinc-800">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-zinc-800">
             <Button
               type="button"
               variant="ghost"
-              size="sm"
               onClick={() => onOpenChange(false)}
-              className="text-xs text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+              className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={!tableName.trim()}
-              className="h-8 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+              className="h-9 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md gap-1.5"
             >
-              Crear Tabla
+              <Plus className="w-4 h-4" />
+              <span>Crear Tabla</span>
             </Button>
           </DialogFooter>
         </form>
