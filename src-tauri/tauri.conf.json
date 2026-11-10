@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "power-diagram",
+  "productName": "Power Diagram",
   "version": "0.1.0",
   "identifier": "com.jose.power-diagram",
   "build": {
