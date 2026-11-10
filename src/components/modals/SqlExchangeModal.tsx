@@ -307,19 +307,19 @@ export function SqlExchangeModal({
 
             <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800 shrink-0">
               <Button
+                type="button"
                 variant="ghost"
-                size="sm"
                 onClick={() => onOpenChange(false)}
-                className="text-xs text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 Cancelar
               </Button>
 
               <Button
-                size="sm"
+                type="button"
                 onClick={handleImportSubmit}
                 disabled={!inputSql.trim()}
-                className="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold gap-1.5 px-4 shadow"
+                className="h-9 px-5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold gap-1.5 shadow-md"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>Convertir a Diagrama DBML</span>
