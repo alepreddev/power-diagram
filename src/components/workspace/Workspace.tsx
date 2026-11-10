@@ -135,7 +135,9 @@ export function Workspace() {
           variant="outline"
           size="sm"
           onClick={() => setIsEditorOpen(!isEditorOpen)}
-          className="absolute bottom-4 left-4 z-20 h-8 px-2 bg-white/90 dark:bg-zinc-900/90 border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-xl"
+          className={`absolute bottom-4 z-20 h-8 px-2.5 bg-white/90 dark:bg-zinc-900/90 border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-xl duration-200 ease-in-out ${
+            isEditorOpen ? "left-4" : "left-16"
+          }`}
           title={isEditorOpen ? "Ocultar editor de código" : "Mostrar editor de código"}
         >
           {isEditorOpen ? (
