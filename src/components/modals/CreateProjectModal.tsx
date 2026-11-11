@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Database, Plus, ChevronDown } from "lucide-react";
+import { Database, Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DbEngineSelect } from "@/components/ui/DbEngineSelect";
 import { createProject, type Project } from "@/db/database";
 
 interface CreateProjectModalProps {
@@ -65,22 +66,12 @@ export function ProjectFormFields({
         <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
           Motor de Base de Datos
         </label>
-        <div className="relative">
-          <select
-            value={engine}
-            onChange={(e) => onEngineChange(e.target.value as EngineType)}
-            className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs rounded-md px-3 pr-9 h-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm cursor-pointer appearance-none"
-          >
-            {DB_ENGINES.map((item) => (
-              <option key={item.value} value={item.value}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-zinc-500">
-            <ChevronDown className="w-4 h-4" />
-          </div>
-        </div>
+        <DbEngineSelect
+          value={engine}
+          onValueChange={onEngineChange}
+          options={DB_ENGINES}
+          triggerClassName="w-full h-10"
+        />
       </div>
     </>
   );

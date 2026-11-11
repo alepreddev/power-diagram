@@ -34,7 +34,7 @@ export function ConfirmDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[92vw] max-w-md sm:max-w-md bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="items-center text-center px-6 pb-4 border-b border-slate-200 dark:border-zinc-800/80 gap-3">
+        <DialogHeader className="items-center text-center px-6 border-slate-200 dark:border-zinc-800/80 gap-3">
           <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
             {title}
           </DialogTitle>

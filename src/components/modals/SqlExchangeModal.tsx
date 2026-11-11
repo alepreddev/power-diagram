@@ -19,6 +19,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { DbEngineSelect, type DbEngineOption } from "@/components/ui/DbEngineSelect";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import {
@@ -28,6 +29,20 @@ import {
   type ExportDialect,
   type ImportDialect,
 } from "@/lib/sqlExportImport";
+
+const EXPORT_DIALECT_OPTIONS: readonly DbEngineOption<ExportDialect>[] = [
+  { value: "postgres", label: "PostgreSQL" },
+  { value: "mysql", label: "MySQL" },
+  { value: "sqlite", label: "SQLite" },
+  { value: "mssql", label: "SQL Server (MSSQL)" },
+  { value: "json", label: "JSON Schema" },
+];
+
+const IMPORT_DIALECT_OPTIONS: readonly DbEngineOption<ImportDialect>[] = [
+  { value: "postgres", label: "PostgreSQL DDL" },
+  { value: "mysql", label: "MySQL DDL" },
+  { value: "mssql", label: "SQL Server DDL" },
+];
 
 interface SqlExchangeModalProps {
   open: boolean;
@@ -194,17 +209,12 @@ export function SqlExchangeModal({
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 whitespace-nowrap">
                   Motor de Base de Datos:
                 </span>
-                <select
+                <DbEngineSelect
                   value={exportDialect}
-                  onChange={(e) => setExportDialect(e.target.value as ExportDialect)}
-                  className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700/80 text-slate-800 dark:text-zinc-100 text-xs rounded-md px-3 h-8 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm"
-                >
-                  <option value="postgres">PostgreSQL</option>
-                  <option value="mysql">MySQL</option>
-                  <option value="sqlite">SQLite</option>
-                  <option value="mssql">SQL Server (MSSQL)</option>
-                  <option value="json">JSON Schema</option>
-                </select>
+                  onValueChange={setExportDialect}
+                  options={EXPORT_DIALECT_OPTIONS}
+                  triggerClassName="h-8 min-w-[205px] bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700/80"
+                />
               </div>
 
               <div className="flex items-center gap-2">
@@ -264,15 +274,12 @@ export function SqlExchangeModal({
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 whitespace-nowrap">
                   Dialecto de Origen:
                 </span>
-                <select
+                <DbEngineSelect
                   value={importDialect}
-                  onChange={(e) => setImportDialect(e.target.value as ImportDialect)}
-                  className="bg-white dark:bg-zinc-900 border border-slate-300 dark:border-zinc-700/80 text-slate-800 dark:text-zinc-100 text-xs rounded-md px-3 h-8 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium shadow-sm"
-                >
-                  <option value="postgres">PostgreSQL DDL</option>
-                  <option value="mysql">MySQL DDL</option>
-                  <option value="mssql">SQL Server DDL</option>
-                </select>
+                  onValueChange={setImportDialect}
+                  options={IMPORT_DIALECT_OPTIONS}
+                  triggerClassName="h-8 min-w-[195px] bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700/80"
+                />
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
