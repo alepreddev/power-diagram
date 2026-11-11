@@ -3,7 +3,7 @@ import { Plus, Trash2, ArrowRight, Pencil } from "lucide-react";
 import { getProjects, deleteProject, type Project } from "@/db/database";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { DashboardOptionsMenu } from "./DashboardOptionsMenu";
 import { CreateProjectModal } from "@/components/modals/CreateProjectModal";
 import { EditProjectModal } from "@/components/modals/EditProjectModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
@@ -88,7 +88,7 @@ export function ProjectDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <ThemeToggle />
+          <DashboardOptionsMenu />
         </div>
       </nav>
 
