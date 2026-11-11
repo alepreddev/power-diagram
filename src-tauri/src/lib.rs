@@ -53,6 +53,8 @@ pub fn run() {
                 if let Some(icon) = app.default_window_icon() {
                     let _ = window.set_icon(icon.clone());
                 }
+                let version = &app.package_info().version;
+                let _ = window.set_title(&format!("Power Diagram v{}", version));
             }
             Ok(())
         })

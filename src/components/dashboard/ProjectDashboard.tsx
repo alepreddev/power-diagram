@@ -82,7 +82,14 @@ export function ProjectDashboard() {
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="Power Diagram" className="w-7 h-7 rounded-lg object-contain shadow-sm" />
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-zinc-100">Power Diagram</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-zinc-100">
+                Power Diagram
+              </h1>
+              {/* <span className="text-[10px] font-mono font-semibold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30">
+                v{__APP_VERSION__}
+              </span> */}
+            </div>
             <span className="text-[10px] text-slate-500 dark:text-zinc-400">ERD Studio & SQL Architect</span>
           </div>
         </div>
