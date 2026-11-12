@@ -1,4 +1,6 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+mod window_state;
+
 use tauri::Manager;
 use tauri_plugin_sql::{Migration, MigrationKind};
 
@@ -55,6 +57,7 @@ pub fn run() {
                 }
                 let version = &app.package_info().version;
                 let _ = window.set_title(&format!("Power Diagram v{}", version));
+                window_state::setup_window_state(app, &window);
             }
             Ok(())
         })
