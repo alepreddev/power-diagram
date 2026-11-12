@@ -250,48 +250,58 @@
 }
 
 /* ==========================================================
-   ESTILOS DE BARRAS DE SCROLL (CodeMirror & General)
+   ESTILOS DE BARRAS DE SCROLL GLOBALES (App completa y CodeMirror)
    ========================================================== */
 
-/* Barra de scroll en CodeMirror (.cm-scroller) */
-.cm-scroller {
+/* Estándar CSS (Firefox y Chromium moderno) */
+* {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.6) transparent;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
 }
 
-.dark .cm-scroller {
-  scrollbar-color: rgba(113, 113, 122, 0.6) transparent;
+.dark * {
+  scrollbar-color: rgba(113, 113, 122, 0.45) transparent;
 }
 
-.cm-scroller::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Motores WebKit / Chromium (Tauri WebView2 en Windows, WebKitGTK en Linux, WKWebView en macOS) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.cm-scroller::-webkit-scrollbar-track {
-  background: transparent;
+/* Sin flechitas ni botones de desplazamiento */
+::-webkit-scrollbar-button {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.cm-scroller::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.6);
+/* Fondo transparente (sin pista visible) */
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* Barra delgada, redondeada, gris y sin bordes */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.45);
   border-radius: 9999px;
-  border: 2px solid transparent;
-  background-clip: content-box;
+  background-clip: padding-box;
 }
 
-.cm-scroller::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 116, 139, 0.9);
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.75);
 }
 
-.dark .cm-scroller::-webkit-scrollbar-thumb {
-  background-color: rgba(113, 113, 122, 0.6);
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(113, 113, 122, 0.45);
 }
 
-.dark .cm-scroller::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(161, 161, 170, 0.9);
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(161, 161, 170, 0.75);
 }
 
-.cm-scroller::-webkit-scrollbar-corner {
-  background: transparent;
+/* Esquina de cruce entre scroll vertical y horizontal */
+::-webkit-scrollbar-corner {
+  background: transparent !important;
 }
 
