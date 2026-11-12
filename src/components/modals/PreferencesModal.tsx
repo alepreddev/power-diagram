@@ -18,7 +18,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -60,19 +59,6 @@ async function openExternalLink(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-function getLicenseBadgeClasses(license: string): string {
-  if (license.includes("EPL")) {
-    return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30";
-  }
-  if (license.includes("OFL")) {
-    return "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30";
-  }
-  if (license.includes("Apache")) {
-    return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30";
-  }
-  return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
-}
-
 function AboutPreferencesContent() {
   const [licenseSearch, setLicenseSearch] = useState("");
   const [showMitText, setShowMitText] = useState(false);
@@ -105,10 +91,10 @@ function AboutPreferencesContent() {
                 <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">
                   {APP_LEGAL_INFO.appName}
                 </h3>
-                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-200 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30">
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
                   v{__APP_VERSION__}
                 </span>
-                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30">
+                <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
                   Open Source · {APP_LEGAL_INFO.licenseName}
                 </span>
               </div>
@@ -207,7 +193,7 @@ function AboutPreferencesContent() {
               Política de Privacidad Local
             </h4>
           </div>
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
             100 % Offline-First
           </span>
         </div>
@@ -290,11 +276,7 @@ function AboutPreferencesContent() {
                   </span>
                 </div>
 
-                <span
-                  className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${getLicenseBadgeClasses(
-                    item.license
-                  )}`}
-                >
+                <span className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
                   {item.license}
                 </span>
               </div>
@@ -340,46 +322,43 @@ export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl h-[82vh] max-h-[700px] p-0 pb-0 gap-0 overflow-hidden flex flex-col bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800">
-        <DialogHeader className="px-6 py-4 pr-12 border-b border-slate-200 dark:border-zinc-800 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200">
-              <SlidersHorizontal className="w-4 h-4" />
-            </div>
-            <div>
-              <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-                Preferencias
-              </DialogTitle>
-              <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                Configuración de la aplicación, información legal y licencias.
-              </DialogDescription>
-            </div>
-          </div>
-        </DialogHeader>
+        <DialogDescription className="sr-only">
+          Preferencias de Power Diagram
+        </DialogDescription>
 
         <div className="flex-1 min-h-0 flex flex-col sm:flex-row overflow-hidden">
-          {/* Sidebar izquierdo para opciones de preferencias */}
+          {/* Sidebar izquierdo con título y opciones de preferencias */}
           <aside className="w-full sm:w-56 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-950/60 p-3 flex sm:flex-col justify-between gap-2 overflow-x-auto sm:overflow-y-auto">
-            <nav aria-label="Categorías de preferencias" className="flex sm:flex-col gap-1">
-              {PREFERENCE_SECTIONS.map((section) => {
-                const Icon = section.icon;
-                const isActive = activeSection === section.id;
-                return (
-                  <button
-                    key={section.id}
-                    type="button"
-                    onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
-                      isActive
-                        ? "bg-indigo-50 text-indigo-700 border border-indigo-200/80 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30"
-                        : "text-slate-600 dark:text-zinc-400 hover:bg-slate-200/60 dark:hover:bg-zinc-800/70 hover:text-slate-900 dark:hover:text-zinc-100"
-                    }`}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span>{section.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 px-2 pt-1 pr-10 sm:pr-2">
+                <SlidersHorizontal className="w-4 h-4 text-slate-600 dark:text-zinc-300 shrink-0" />
+                <DialogTitle className="text-sm font-bold text-slate-900 dark:text-zinc-100">
+                  Preferencias
+                </DialogTitle>
+              </div>
+
+              <nav aria-label="Categorías de preferencias" className="flex sm:flex-col gap-1">
+                {PREFERENCE_SECTIONS.map((section) => {
+                  const Icon = section.icon;
+                  const isActive = activeSection === section.id;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setActiveSection(section.id)}
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                        isActive
+                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200/80 dark:bg-indigo-500/15 dark:text-indigo-300 dark:border-indigo-500/30"
+                          : "text-slate-600 dark:text-zinc-400 hover:bg-slate-200/60 dark:hover:bg-zinc-800/70 hover:text-slate-900 dark:hover:text-zinc-100"
+                      }`}
+                    >
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span>{section.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
 
             <p className="hidden sm:block px-2 pt-2 border-t border-slate-200/80 dark:border-zinc-800/80 text-[11px] text-slate-400 dark:text-zinc-500">
               Más opciones de configuración próximamente.
@@ -387,9 +366,13 @@ export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) 
           </aside>
 
           {/* Panel de contenido al lado del sidebar */}
-          <main className="flex-1 min-w-0 overflow-y-auto p-5 sm:p-6">
-            {activeSection === "about" && <AboutPreferencesContent />}
-          </main>
+          <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+            {/* Espacio superior para alinear con el botón de cerrar (X) sin encimar el scroll */}
+            <div className="hidden sm:block h-10 shrink-0" aria-hidden="true" />
+            <main className="flex-1 min-w-0 overflow-y-auto px-5 sm:px-6 pb-6 pt-4 sm:pt-1">
+              {activeSection === "about" && <AboutPreferencesContent />}
+            </main>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
