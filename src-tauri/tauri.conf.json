@@ -27,12 +27,33 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "publisher": "José Arocha",
+    "homepage": "https://github.com/alepreddev/power-diagram",
+    "copyright": "Copyright © 2026 José Arocha",
+    "license": "MIT",
+    "licenseFile": "../LICENSE",
+    "category": "DeveloperTool",
+    "shortDescription": "Editor visual de diagramas entidad-relación (ERD) y arquitecto SQL offline-first.",
+    "longDescription": "Power Diagram es una aplicación de escritorio multiplataforma para diseñar diagramas entidad-relación (ERD), editar código DBML e importar o exportar DDL SQL nativo para PostgreSQL, MySQL, SQLite y SQL Server de forma 100 % local.",
+    "resources": [
+      "../LICENSE",
+      "../PRIVACY.md",
+      "../THIRD_PARTY_LICENSES.txt"
+    ],
     "icon": [
       "icons/128x128@2x.png",
       "icons/128x128.png",
       "icons/32x32.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "linux": {
+      "deb": {
+        "section": "devel"
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "10.13"
+    }
   }
 }
