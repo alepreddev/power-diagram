@@ -30,12 +30,14 @@ export function EditProjectModal({
   project,
   onSuccess,
 }: EditProjectModalProps) {
+  const [activeProject, setActiveProject] = useState<Project | null>(project);
   const [name, setName] = useState("");
   const [engine, setEngine] = useState<EngineType>("postgres");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (project && open) {
+    if (project) {
+      setActiveProject(project);
       setName(project.name);
       const normalized = project.db_engine?.toLowerCase();
       const matched = DB_ENGINES.find((item) => item.value === normalized);
@@ -43,7 +45,8 @@ export function EditProjectModal({
     }
   }, [project, open]);
 
-  if (!project) return null;
+  const targetProject = project || activeProject;
+  if (!targetProject) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +55,10 @@ export function EditProjectModal({
 
     try {
       setIsSaving(true);
-      await updateProject(project.id, cleanName, engine);
+      await updateProject(targetProject.id, cleanName, engine);
       onOpenChange(false);
       onSuccess({
-        ...project,
+        ...targetProject,
         name: cleanName,
         db_engine: engine,
       });
@@ -68,8 +71,8 @@ export function EditProjectModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
+      <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+        <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
               <Database className="w-5 h-5" />
@@ -94,7 +97,7 @@ export function EditProjectModal({
             placeholder="Nombre del proyecto"
           />
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-zinc-800">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="ghost"

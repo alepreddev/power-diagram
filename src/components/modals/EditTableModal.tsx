@@ -43,6 +43,7 @@ const COMMON_SQL_TYPES = [
 export function EditTableModal({ open, onOpenChange, tableData }: EditTableModalProps) {
   const { updateTable, deleteTable } = useDiagramStore();
 
+  const [activeTable, setActiveTable] = useState<TableNodeData | null>(tableData);
   const [tableName, setTableName] = useState("");
   const [headerColor, setHeaderColor] = useState(COLOR_PRESETS[0].value);
   const [note, setNote] = useState("");
@@ -52,6 +53,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
   // Sincronizar datos cada vez que se selecciona una tabla para editar
   useEffect(() => {
     if (tableData) {
+      setActiveTable(tableData);
       setTableName(tableData.label);
       setHeaderColor(tableData.headerColor || COLOR_PRESETS[0].value);
       setNote(tableData.note || "");
@@ -64,7 +66,8 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
     setIsDeleteConfirmOpen(false);
   }, [tableData, open]);
 
-  if (!tableData) return null;
+  const currentTable = tableData || activeTable;
+  if (!currentTable) return null;
 
   const handleAddColumn = () => {
     setColumns([
@@ -96,7 +99,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
     const cleanName = tableName.trim().toLowerCase().replace(/\s+/g, "_");
     if (!cleanName) return;
 
-    updateTable(tableData.label, cleanName, columns, headerColor, note.trim() || undefined);
+    updateTable(currentTable.label, cleanName, columns, headerColor, note.trim() || undefined);
     onOpenChange(false);
   };
 
@@ -105,7 +108,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
   };
 
   const handleConfirmDelete = () => {
-    deleteTable(tableData.label);
+    deleteTable(currentTable.label);
     setIsDeleteConfirmOpen(false);
     onOpenChange(false);
   };
@@ -113,12 +116,12 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
+      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+        <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-              Editar Tabla: <span className="text-indigo-600 dark:text-indigo-400 font-mono">{tableData.label}</span>
+              Editar Tabla: <span className="text-indigo-600 dark:text-indigo-400 font-mono">{currentTable.label}</span>
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400">
@@ -282,7 +285,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
           </div>
 
           {/* Footer con Eliminar a la izquierda y Guardar a la derecha */}
-          <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-slate-200 dark:border-zinc-800">
+          <DialogFooter className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -319,7 +322,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
       open={isDeleteConfirmOpen}
       onOpenChange={setIsDeleteConfirmOpen}
       title="Eliminar Tabla"
-      description={`¿Estás seguro de que deseas eliminar la tabla "${tableData.label}" y todas sus relaciones del diagrama?`}
+      description={`¿Estás seguro de que deseas eliminar la tabla "${currentTable.label}" y todas sus relaciones del diagrama?`}
       confirmLabel="Eliminar"
       onConfirm={handleConfirmDelete}
     />
