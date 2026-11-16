@@ -125,9 +125,9 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
 
   return (
     <div
-      className={`rounded-lg bg-white dark:bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] shadow-xl dark:shadow-2xl ${
+      className={`rounded-lg bg-white dark:bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] ${
         selected
-          ? "border-indigo-500 ring-2 ring-indigo-500/30 shadow-indigo-500/10"
+          ? "border-indigo-500 ring-2 ring-indigo-500/30"
           : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
       }`}
     >

@@ -80,7 +80,7 @@ function ProjectCard({
   return (
     <div
       onClick={onOpen}
-      className="group relative rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:border-indigo-400 dark:hover:border-indigo-500/50 p-4 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md dark:shadow-lg dark:hover:shadow-indigo-500/5 flex flex-col justify-between min-h-[140px]"
+      className="group relative rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:border-indigo-400 dark:hover:border-indigo-500/50 p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[140px]"
     >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -131,7 +131,7 @@ function ProjectCard({
         </h4>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500">
+      <div className="mt-4 pt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500">
         <span>
           {new Date(project.created_at).toLocaleDateString([], {
             day: "2-digit",
@@ -155,7 +155,16 @@ export function ProjectDashboard() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProject, setDeletingProject] = useState<Project | null>(null);
+  const [cachedDeletingProject, setCachedDeletingProject] = useState<Project | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (deletingProject) {
+      setCachedDeletingProject(deletingProject);
+    }
+  }, [deletingProject]);
+
+  const targetDeletingProject = deletingProject || cachedDeletingProject;
 
   const { setActiveProject } = useDiagramStore();
 
@@ -379,7 +388,7 @@ export function ProjectDashboard() {
           if (!open && !isDeleting) setDeletingProject(null);
         }}
         title="Eliminar Base de Datos"
-        description={`¿Estás seguro de que deseas eliminar "${deletingProject?.name ?? ""}" y su diagrama? Esta acción no se puede deshacer.`}
+        description={`¿Estás seguro de que deseas eliminar "${targetDeletingProject?.name ?? ""}" y su diagrama? Esta acción no se puede deshacer.`}
         confirmLabel="Eliminar"
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
