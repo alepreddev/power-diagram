@@ -1,0 +1,148 @@
+===============================================================================
+                ACUERDO DE LICENCIA Y TÉRMINOS DE USO DE POWER DIAGRAM
+===============================================================================
+
+Versión: 0.1.0
+Titular del Copyright: © 2026 José Arocha
+Repositorio Oficial: https://github.com/alepreddev/power-diagram
+Tipo de Licencia: Licencia MIT (Código Abierto / Open Source)
+
+Por favor, lea atentamente los siguientes términos, condiciones, política de
+privacidad y avisos de terceros antes de instalar Power Diagram. Al continuar con
+la instalación o utilizar este software, usted acepta quedar sujeto a las
+disposiciones aquí establecidas.
+
+===============================================================================
+1. LICENCIA DE SOFTWARE (MIT LICENSE)
+===============================================================================
+
+Copyright (c) 2026 José Arocha
+
+Se concede permiso por la presente, de forma gratuita, a cualquier persona que
+obtenga una copia de este software y los archivos de documentación asociados
+(el "Software"), para utilizar el Software sin restricciones, incluyendo sin
+limitación los derechos de uso, copia, modificación, fusión, publicación,
+distribución, sublicenciamiento y/o venta de copias del Software, y para permitir
+a las personas a las que se les proporcione el Software que lo hagan, sujeto a las
+siguientes condiciones:
+
+El aviso de copyright anterior y este aviso de permiso se incluirán en todas las
+copias o partes sustanciales del Software.
+
+EL SOFTWARE SE PROPORCIONA "TAL CUAL" ("AS IS"), SIN GARANTÍA DE NINGÚN TIPO,
+EXPRESA O IMPLÍCITA, INCLUYENDO PERO SIN LIMITARSE A LAS GARANTÍAS DE
+COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN. EN
+NINGÚN CASO LOS AUTORES O TITULARES DEL COPYRIGHT SERÁN RESPONSABLES DE NINGUNA
+RECLAMACIÓN, DAÑO U OTRA RESPONSABILIDAD, YA SEA EN UNA ACCIÓN DE CONTRATO,
+AGRAVIO O DE OTRO TIPO, QUE SURJA DE, FUERA DE O EN CONEXIÓN CON EL SOFTWARE O
+EL USO U OTROS TRATOS EN EL SOFTWARE.
+
+(Texto original en inglés):
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+===============================================================================
+2. POLÍTICA DE PRIVACIDAD LOCAL (100% OFFLINE-FIRST)
+===============================================================================
+
+Power Diagram respeta al máximo la privacidad de sus usuarios y está diseñado
+bajo una arquitectura estrictamente local:
+
+* Cero Telemetría y Cero Cuentas:
+  Power Diagram no recopila información personal, credenciales, métricas de
+  rendimiento, analíticas de comportamiento ni reportes automáticos de errores.
+  No se requiere inicio de sesión ni conexión a internet para operar el programa.
+
+* Almacenamiento Estrictamente Local:
+  Todos sus proyectos, diagramas de bases de datos, código DBML, configuraciones
+  de ventana y preferencias se guardan única y exclusivamente en su dispositivo,
+  en el directorio de configuración del sistema operativo asignado a la app
+  (base de datos SQLite 'erd_studio.db' y preferencias 'window-state.json').
+
+* Sin Transmisión de Esquemas ni Scripts:
+  El modelado de tablas, renderizado de diagramas, formateo de código y
+  generación o parseo de scripts DDL SQL se ejecutan en su totalidad dentro
+  de su máquina local. Ningún esquema ni consulta es transmitida a servidores
+  externos.
+
+* Enlaces a Sitios Externos:
+  Si el usuario decide voluntariamente hacer clic en enlaces externos (como el
+  repositorio oficial en GitHub), estos se abrirán en el navegador web
+  predeterminado del sistema y estarán sujetos a las políticas de dicho sitio.
+
+===============================================================================
+3. EXENCIÓN DE RESPONSABILIDAD Y USO DE SCRIPTS SQL
+===============================================================================
+
+* Verificación de Scripts SQL y Migraciones:
+  Power Diagram proporciona herramientas para diseñar diagramas ERD y exportar
+  código SQL para múltiples dialectos (PostgreSQL, MySQL, SQLite y SQL Server).
+  El usuario es el único responsable de revisar, validar y probar exhaustivamente
+  cualquier script DDL o SQL generado antes de su ejecución en bases de datos
+  de producción, pruebas o desarrollo.
+
+* Renuncia a Responsabilidad por Pérdida de Datos:
+  El autor y los colaboradores no serán responsables por ninguna pérdida o
+  corrupción de datos, fallas operativas, interrupciones de servicio ni
+  consecuencias directas o indirectas derivadas de la ejecución de scripts
+  generados con la aplicación.
+
+* Uso Nominativo de Marcas Comerciales:
+  Los nombres, términos y logotipos relativos a PostgreSQL, MySQL, SQLite y
+  Microsoft SQL Server se utilizan de manera estrictamente descriptiva y
+  nominativa para indicar compatibilidad de dialectos. Power Diagram es un
+  proyecto independiente y no está patrocinado, afiliado ni respaldado por
+  PostgreSQL Global Development Group, Oracle Corporation, SQLite Consortium /
+  Hwaci ni Microsoft Corporation.
+
+===============================================================================
+4. AVISOS DE COMPONENTES Y TIPOGRAFÍAS DE TERCEROS
+===============================================================================
+
+Power Diagram incorpora componentes, bibliotecas de código abierto y fuentes
+tipográficas bajo sus respectivas licencias:
+
+* elkjs (0.12.1)
+  Copyright (c) Ulf Rüegg & Eclipse Layout Kernel contributors
+  Licencia: Eclipse Public License 2.0 (EPL-2.0)
+  Código fuente disponible en: https://github.com/kieler/elkjs
+
+* @fontsource-variable/geist (5.3.0)
+  Copyright 2024 The Geist Project Authors
+  Licencia: SIL Open Font License, Version 1.1 (OFL-1.1)
+  (La tipografía se distribuye integrada y no puede comercializarse por separado).
+
+* @dbml/core y @dbml/parse (11.0.0)
+  Copyright (c) Holistics (https://github.com/holistics/dbml)
+  Licencia: Apache License 2.0 (Apache-2.0)
+
+* Tauri Framework & Plugins
+  Copyright (c) Tauri Programme within The Commons Conservancy
+  Licencia: Dual MIT / Apache-2.0 (tao bajo Apache-2.0)
+
+* React, React Flow (@xyflow/react), CodeMirror, Zustand, Lucide Icons, Radix UI
+  Licencia: MIT License (Meta, xyflow, CodeMirror contributors, etc.)
+
+El texto íntegro de las licencias de terceros se encuentra disponible en el
+archivo THIRD_PARTY_LICENSES.txt ubicado en la carpeta de instalación del
+programa y dentro del menú Preferencias -> Acerca de en la aplicación.
+
+===============================================================================
+Al hacer clic en "Acepto" o continuar con la instalación, usted confirma que ha
+leído, comprendido y aceptado todos los términos y acuerdos aquí expuestos.
+===============================================================================
