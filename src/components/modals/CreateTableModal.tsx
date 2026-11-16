@@ -83,8 +83,8 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="pr-10 pb-2 border-b border-slate-200 dark:border-zinc-800/80">
+      <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+        <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
@@ -238,7 +238,7 @@ export function CreateTableModal({ open, onOpenChange }: CreateTableModalProps) 
             </div>
           </div>
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-zinc-800">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="ghost"

@@ -108,8 +108,8 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="pr-10 pb-3 border-b border-slate-200 dark:border-zinc-800/80">
+      <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+        <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
               <Database className="w-5 h-5" />
@@ -133,7 +133,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
             onEngineChange={setEngine}
           />
 
-          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-zinc-800">
+          <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-2">
             <Button
               type="button"
               variant="ghost"

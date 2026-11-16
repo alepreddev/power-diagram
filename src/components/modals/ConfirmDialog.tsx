@@ -33,12 +33,12 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[92vw] max-w-md sm:max-w-md bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
-        <DialogHeader className="items-center text-center px-6 border-slate-200 dark:border-zinc-800/80 gap-3">
+      <DialogContent className="w-[92vw] max-w-md sm:max-w-md bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
+        <DialogHeader className="items-center text-center px-6 gap-3">
           <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
             {title}
           </DialogTitle>
-          <div className="p-2.5 rounded-xl dark:border-zinc-700 text-slate-500 dark:text-zinc-400">
+          <div className="p-2.5 rounded-xl text-slate-500 dark:text-zinc-400">
             <Trash2 className="w-5 h-5" />
           </div>
           <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed text-center">
@@ -46,7 +46,7 @@ export function ConfirmDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="flex flex-row items-center justify-center sm:justify-center gap-2.5 pt-3">
+        <DialogFooter className="flex flex-row items-center justify-center sm:justify-center gap-2.5 pt-2">
           <Button
             type="button"
             variant="ghost"
