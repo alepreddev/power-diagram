@@ -42,11 +42,31 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Variables dinámicas del color de acento de la app */
+  --app-accent-main: #4f46e5;
+  --app-accent-hover: #4338ca;
+  --app-accent-active: #3730a3;
+  --app-accent-contrast: #ffffff;
+  --app-accent-text: #4f46e5;
+  --app-accent-subtle: rgba(99, 102, 241, 0.10);
+  --app-accent-subtle-hover: rgba(99, 102, 241, 0.18);
+  --app-accent-border: rgba(99, 102, 241, 0.35);
+  --app-accent-ring: rgba(99, 102, 241, 0.40);
 }
 
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: 'Geist Variable', sans-serif;
+  --color-app-accent: var(--app-accent-main);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-accent-active: var(--app-accent-active);
+  --color-app-accent-contrast: var(--app-accent-contrast);
+  --color-app-accent-text: var(--app-accent-text);
+  --color-app-accent-subtle: var(--app-accent-subtle);
+  --color-app-accent-subtle-hover: var(--app-accent-subtle-hover);
+  --color-app-accent-border: var(--app-accent-border);
+  --color-app-accent-ring: var(--app-accent-ring);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -119,6 +139,17 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* Variables dinámicas del color de acento de la app en modo oscuro */
+  --app-accent-main: #6366f1;
+  --app-accent-hover: #818cf8;
+  --app-accent-active: #4f46e5;
+  --app-accent-contrast: #ffffff;
+  --app-accent-text: #818cf8;
+  --app-accent-subtle: rgba(99, 102, 241, 0.18);
+  --app-accent-subtle-hover: rgba(99, 102, 241, 0.28);
+  --app-accent-border: rgba(99, 102, 241, 0.35);
+  --app-accent-ring: rgba(99, 102, 241, 0.40);
 }
 
 @layer base {
@@ -191,8 +222,8 @@
 
 .react-flow__controls-button:hover {
   background-color: #f1f5f9 !important; /* slate-100 */
-  color: #4f46e5 !important; /* indigo-600 */
-  fill: #4f46e5 !important;
+  color: var(--app-accent-text, #4f46e5) !important;
+  fill: var(--app-accent-text, #4f46e5) !important;
 }
 
 .react-flow__controls-button svg {
@@ -235,8 +266,8 @@
 
 .dark .react-flow__controls-button:hover {
   background-color: #27272a !important;
-  color: #818cf8 !important; /* indigo-400 */
-  fill: #818cf8 !important;
+  color: var(--app-accent-text, #818cf8) !important;
+  fill: var(--app-accent-text, #818cf8) !important;
 }
 
 .dark .react-flow__minimap {
