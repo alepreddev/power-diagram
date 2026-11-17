@@ -82,7 +82,7 @@ export function WorkspaceHeader() {
           <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
           <div className="flex items-center gap-2">
-            <Database className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+            <Database className="w-4 h-4 text-app-accent-text" />
             <span className="font-semibold text-sm text-slate-800 dark:text-zinc-100 truncate max-w-[200px]">
               {activeProject.name}
             </span>
@@ -172,7 +172,7 @@ export function WorkspaceHeader() {
             className="h-8 gap-1 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 font-medium"
             title="Crear tabla visualmente"
           >
-            <Plus className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+            <Plus className="w-3.5 h-3.5 text-app-accent-text" />
             <span>Nueva Tabla</span>
           </Button>
 
@@ -182,7 +182,7 @@ export function WorkspaceHeader() {
             size="sm"
             onClick={() => saveToDatabase()}
             disabled={isSaving || !isDirty}
-            className="h-8 gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50"
+            className="h-8 gap-1.5 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast disabled:opacity-50 cursor-pointer"
             title="Forzar guardado manual en SQLite"
           >
             <Save className="w-3.5 h-3.5" />

@@ -36,9 +36,9 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
         type="target"
         position={Position.Left}
         id={`${column.name}-target`}
-        className={`!w-2 !h-2 !-left-1 !bg-indigo-500 dark:!bg-indigo-400 !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+        className={`!w-2 !h-2 !-left-1 !bg-app-accent !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
           isLeftConnected
-            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(99,102,241,0.6)] dark:shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_var(--app-accent-ring)]"
             : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
         }`}
       />
@@ -92,9 +92,9 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
         type="source"
         position={Position.Right}
         id={`${column.name}-source`}
-        className={`!w-2 !h-2 !-right-1 !bg-indigo-500 dark:!bg-indigo-400 !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
+        className={`!w-2 !h-2 !-right-1 !bg-app-accent !border-2 !border-white dark:!border-zinc-950 rounded-full cursor-crosshair transition-all duration-150 ${
           isRightConnected
-            ? "!opacity-100 !scale-100 shadow-[0_0_6px_rgba(99,102,241,0.6)] dark:shadow-[0_0_6px_rgba(129,140,248,0.8)]"
+            ? "!opacity-100 !scale-100 shadow-[0_0_6px_var(--app-accent-ring)]"
             : "!opacity-0 group-hover/col:!opacity-100 !scale-75 group-hover/col:!scale-125"
         }`}
       />
@@ -127,7 +127,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
     <div
       className={`rounded-lg bg-white dark:bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] ${
         selected
-          ? "border-indigo-500 ring-2 ring-indigo-500/30"
+          ? "border-app-accent ring-2 ring-app-accent/30"
           : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
       }`}
     >
@@ -160,7 +160,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
               e.stopPropagation();
               openEditTableModal(data);
             }}
-            className="p-0.5 rounded text-slate-400 hover:text-indigo-600 hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:text-indigo-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
+            className="p-0.5 rounded text-slate-400 hover:text-app-accent-text hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
             title="Editar características de la tabla"
           >
             <Settings className="w-3.5 h-3.5" />

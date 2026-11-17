@@ -80,7 +80,7 @@ function ProjectCard({
   return (
     <div
       onClick={onOpen}
-      className="group relative rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:border-indigo-400 dark:hover:border-indigo-500/50 p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[140px]"
+      className="group relative rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:border-app-accent-border p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between min-h-[140px]"
     >
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -106,7 +106,7 @@ function ProjectCard({
                 e.stopPropagation();
                 onEdit();
               }}
-              className="h-7 w-7 p-0 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:text-zinc-500 dark:hover:text-indigo-400 dark:hover:bg-indigo-500/10 rounded"
+              className="h-7 w-7 p-0 text-slate-400 hover:text-app-accent-text hover:bg-app-accent-subtle rounded"
               title="Editar proyecto"
             >
               <Pencil className="w-3.5 h-3.5" />
@@ -126,7 +126,7 @@ function ProjectCard({
           </div>
         </div>
 
-        <h4 className="font-semibold text-sm text-slate-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+        <h4 className="font-semibold text-sm text-slate-900 dark:text-zinc-100 group-hover:text-app-accent-text transition-colors truncate">
           {project.name}
         </h4>
       </div>
@@ -139,7 +139,7 @@ function ProjectCard({
             year: "numeric",
           })}
         </span>
-        <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+        <span className="flex items-center gap-1 text-app-accent-text opacity-0 group-hover:opacity-100 transition-opacity font-medium">
           <span>Abrir</span>
           <ArrowRight className="w-3 h-3" />
         </span>
@@ -301,9 +301,9 @@ export function ProjectDashboard() {
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(true)}
-              className="group border border-dashed border-slate-300 dark:border-zinc-800 hover:border-indigo-500 dark:hover:border-indigo-400 bg-white/40 dark:bg-zinc-900/30 hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10 rounded-lg p-5 flex flex-col items-center justify-center gap-2.5 transition-all text-slate-600 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 cursor-pointer min-h-[140px]"
+              className="group border border-dashed border-slate-300 dark:border-zinc-800 hover:border-app-accent-border bg-white/40 dark:bg-zinc-900/30 hover:bg-app-accent-subtle rounded-lg p-5 flex flex-col items-center justify-center gap-2.5 transition-all text-slate-600 dark:text-zinc-400 hover:text-app-accent-text cursor-pointer min-h-[140px]"
             >
-              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-zinc-800 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 flex items-center justify-center transition-colors">
+              <div className="w-9 h-9 rounded-full bg-slate-100 dark:bg-zinc-800 group-hover:bg-app-accent-subtle group-hover:text-app-accent-text flex items-center justify-center transition-colors">
                 <Plus className="w-4 h-4" />
               </div>
               <div className="text-center">

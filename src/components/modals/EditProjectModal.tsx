@@ -74,7 +74,7 @@ export function EditProjectModal({
       <DialogContent className="w-[92vw] max-w-lg sm:max-w-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg text-indigo-600 dark:text-indigo-400">
+            <div className="p-2 rounded-lg text-app-accent-text">
               <Database className="w-5 h-5" />
             </div>
             <div>
@@ -109,7 +109,7 @@ export function EditProjectModal({
             <Button
               type="submit"
               disabled={isSaving || !name.trim()}
-              className="h-9 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md gap-1.5"
+              className="h-9 px-5 bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-md gap-1.5 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
               <span>{isSaving ? "Guardando..." : "Guardar Cambios"}</span>

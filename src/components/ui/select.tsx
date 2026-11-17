@@ -30,7 +30,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "flex items-center justify-between gap-2 rounded-md border border-slate-300 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-3 text-xs font-medium text-slate-900 dark:text-zinc-100 shadow-sm outline-none transition-colors focus:ring-1 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
+        "flex items-center justify-between gap-2 rounded-md border border-slate-300 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-3 text-xs font-medium text-slate-900 dark:text-zinc-100 shadow-sm outline-none transition-colors focus:ring-1 focus:ring-app-accent disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer",
         className
       )}
       {...props}
@@ -111,14 +111,14 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-2.5 pr-8 text-xs font-medium outline-none transition-colors focus:bg-indigo-50 focus:text-indigo-700 dark:focus:bg-indigo-500/15 dark:focus:text-indigo-300 data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "relative flex w-full cursor-pointer select-none items-center rounded-md py-2 pl-2.5 pr-8 text-xs font-medium outline-none transition-colors focus:bg-app-accent-subtle focus:text-app-accent-text data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       {...props}
     >
       <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
-          <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+          <Check className="w-3.5 h-3.5 text-app-accent-text" />
         </SelectPrimitive.ItemIndicator>
       </span>
       {children}

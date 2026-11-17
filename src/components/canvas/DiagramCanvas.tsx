@@ -101,7 +101,7 @@ function ZoomIndicator() {
       onMouseLeave={handleMouseLeave}
       title={`Zoom aplicado: ${zoomPercent}% (Clic para restablecer al 100%)`}
       aria-live="polite"
-      className={`flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-xs font-mono font-semibold bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 shadow-lg hover:border-indigo-400 dark:hover:border-indigo-500/60 transition-all duration-200 cursor-pointer select-none ${
+      className={`flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-xs font-mono font-semibold bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 shadow-lg hover:border-app-accent-border transition-all duration-200 cursor-pointer select-none ${
         isVisible
           ? "opacity-100 translate-x-0 scale-100"
           : "opacity-0 translate-x-2 scale-95 pointer-events-none"
@@ -110,7 +110,7 @@ function ZoomIndicator() {
       {direction === "out" ? (
         <ZoomOut className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
       ) : (
-        <ZoomIn className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+        <ZoomIn className="w-3.5 h-3.5 text-app-accent-text shrink-0" />
       )}
       <span className="tabular-nums">{zoomPercent}%</span>
     </button>
@@ -203,7 +203,7 @@ function CanvasContent() {
             className="h-8 gap-1.5 text-xs bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
             title="Ajustar vista a todas las tablas"
           >
-            <ZoomIn className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+            <ZoomIn className="w-3.5 h-3.5 text-app-accent-text" />
             <span>Centrar</span>
           </Button>
         </div>

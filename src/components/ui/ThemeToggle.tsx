@@ -25,7 +25,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         {resolvedTheme === "dark" ? (
           <Sun className="w-4 h-4 text-amber-400 transition-transform duration-200 rotate-0 hover:rotate-45" />
         ) : (
-          <Moon className="w-4 h-4 text-indigo-500 transition-transform duration-200" />
+          <Moon className="w-4 h-4 text-app-accent-text transition-transform duration-200" />
         )}
       </Button>
     </div>

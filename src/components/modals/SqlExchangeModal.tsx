@@ -159,7 +159,7 @@ export function SqlExchangeModal({
         <DialogHeader className="shrink-0 pr-10 pb-2 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+              <Database className="w-5 h-5 text-app-accent-text" />
               <div>
                 <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
                   Intercambio SQL y Esquemas DDL
@@ -175,9 +175,9 @@ export function SqlExchangeModal({
               <button
                 type="button"
                 onClick={() => setActiveTab("export")}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   activeTab === "export"
-                    ? "bg-indigo-600 text-white shadow"
+                    ? "bg-app-accent text-app-accent-contrast shadow"
                     : "text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
@@ -186,9 +186,9 @@ export function SqlExchangeModal({
               <button
                 type="button"
                 onClick={() => setActiveTab("import")}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
                   activeTab === "import"
-                    ? "bg-indigo-600 text-white shadow"
+                    ? "bg-app-accent text-app-accent-contrast shadow"
                     : "text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
@@ -241,7 +241,7 @@ export function SqlExchangeModal({
                   variant="default"
                   size="sm"
                   onClick={handleDownload}
-                  className="h-8 text-xs bg-indigo-600 hover:bg-indigo-500 text-white gap-1.5 font-semibold shadow"
+                  className="h-8 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast gap-1.5 font-semibold shadow cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Descargar .{exportDialect === "json" ? "json" : "sql"}</span>
@@ -284,7 +284,7 @@ export function SqlExchangeModal({
 
               <div className="flex flex-wrap items-center gap-3">
                 <label className="text-xs text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 dark:text-zinc-300 dark:hover:text-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:border-zinc-700 cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm">
-                  <FileCode className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                  <FileCode className="w-3.5 h-3.5 text-app-accent-text" />
                   <span>Cargar archivo .sql</span>
                   <input
                     type="file"
@@ -295,25 +295,25 @@ export function SqlExchangeModal({
                 </label>
 
                 <div className="flex items-center gap-3 text-xs text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-md border border-slate-300 dark:border-zinc-800 shadow-sm">
-                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-500">
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-app-accent-text">
                     <input
                       type="radio"
                       name="importMode"
                       value="replace"
                       checked={importMode === "replace"}
                       onChange={() => setImportMode("replace")}
-                      className="accent-indigo-500"
+                      className="accent-app-accent"
                     />
                     <span>Reemplazar</span>
                   </label>
-                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-indigo-500">
+                  <label className="flex items-center gap-1.5 cursor-pointer hover:text-app-accent-text">
                     <input
                       type="radio"
                       name="importMode"
                       value="append"
                       checked={importMode === "append"}
                       onChange={() => setImportMode("append")}
-                      className="accent-indigo-500"
+                      className="accent-app-accent"
                     />
                     <span>Añadir</span>
                   </label>
@@ -357,7 +357,7 @@ export function SqlExchangeModal({
                 type="button"
                 onClick={handleImportSubmit}
                 disabled={!inputSql.trim()}
-                className="h-9 px-5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-semibold gap-1.5 shadow-md"
+                className="h-9 px-5 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast font-semibold gap-1.5 shadow-md cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>Convertir a Diagrama DBML</span>

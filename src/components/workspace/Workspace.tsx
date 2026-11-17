@@ -108,8 +108,8 @@ export function Workspace() {
             <div
               onMouseDown={startResizing}
               onDoubleClick={resetWidth}
-              className={`absolute top-0 -right-1 w-2 h-full cursor-col-resize z-30 group hover:bg-indigo-500/20 active:bg-indigo-500/40 transition-colors ${
-                isResizing ? "bg-indigo-500/30" : ""
+              className={`absolute top-0 -right-1 w-2 h-full cursor-col-resize z-30 group hover:bg-app-accent/20 active:bg-app-accent/40 transition-colors ${
+                isResizing ? "bg-app-accent/30" : ""
               }`}
               title="Arrastra para ajustar el ancho (Doble clic para restaurar)"
             >
@@ -117,8 +117,8 @@ export function Workspace() {
               <div
                 className={`absolute top-0 right-1 w-[2px] h-full transition-colors ${
                   isResizing
-                    ? "bg-indigo-500 shadow-sm"
-                    : "bg-transparent group-hover:bg-indigo-400/80"
+                    ? "bg-app-accent shadow-sm"
+                    : "bg-transparent group-hover:bg-app-accent/80"
                 }`}
               />
             </div>
@@ -147,7 +147,7 @@ export function Workspace() {
             </>
           ) : (
             <>
-              <PanelLeftOpen className="w-3.5 h-3.5 mr-1 text-indigo-500 dark:text-indigo-400" />
+              <PanelLeftOpen className="w-3.5 h-3.5 mr-1 text-app-accent-text" />
               <span className="text-[11px]">Abrir Editor</span>
             </>
           )}

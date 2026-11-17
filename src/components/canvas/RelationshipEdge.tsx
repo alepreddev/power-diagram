@@ -67,8 +67,8 @@ function RelationshipEdgeComponent({
           <div
             className={`group/badge flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-all duration-150 shadow-sm border ${
               isHighlighted
-                ? "bg-indigo-600 text-white border-indigo-500 shadow-md scale-110"
-                : "bg-white/95 dark:bg-zinc-900/95 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:border-indigo-400 dark:hover:border-indigo-500"
+                ? "bg-app-accent text-app-accent-contrast border-app-accent shadow-md scale-110"
+                : "bg-white/95 dark:bg-zinc-900/95 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:border-app-accent-border"
             }`}
             title={`Relación ${relationType} (Clic para eliminar)`}
           >

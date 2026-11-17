@@ -119,9 +119,9 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
       <DialogContent className="w-[92vw] max-w-3xl sm:max-w-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 shadow-2xl p-6 pb-5">
         <DialogHeader className="pr-10 pb-1">
           <div className="flex items-center gap-2">
-            <Database className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />
+            <Database className="w-5 h-5 text-app-accent-text" />
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-              Editar Tabla: <span className="text-indigo-600 dark:text-indigo-400 font-mono">{currentTable.label}</span>
+              Editar Tabla: <span className="text-app-accent-text font-mono">{currentTable.label}</span>
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400">
@@ -186,7 +186,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                 onClick={handleAddColumn}
                 className="h-7 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 gap-1.5"
               >
-                <Plus className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400" />
+                <Plus className="w-3.5 h-3.5 text-app-accent-text" />
                 <span>Agregar Columna</span>
               </Button>
             </div>
@@ -221,7 +221,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                     <select
                       value={col.type}
                       onChange={(e) => handleColumnChange(idx, "type", e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-xs rounded-md h-8 px-2 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                      className="w-full bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 text-slate-800 dark:text-zinc-200 text-xs rounded-md h-8 px-2 focus:outline-none focus:ring-1 focus:ring-app-accent font-mono"
                     >
                       {COMMON_SQL_TYPES.map((t) => (
                         <option key={t} value={t}>
@@ -244,14 +244,14 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                       <span className={col.pk ? "font-bold text-amber-600 dark:text-amber-400" : ""}>PK</span>
                     </label>
 
-                    <label className="flex items-center gap-1 cursor-pointer hover:text-indigo-500" title="Not Null">
+                    <label className="flex items-center gap-1 cursor-pointer hover:text-app-accent-text" title="Not Null">
                       <input
                         type="checkbox"
                         checked={col.notNull}
                         onChange={(e) => handleColumnChange(idx, "notNull", e.target.checked)}
-                        className="rounded border-slate-300 dark:border-zinc-700 text-indigo-500 focus:ring-0 accent-indigo-500"
+                        className="rounded border-slate-300 dark:border-zinc-700 text-app-accent-text focus:ring-0 accent-app-accent"
                       />
-                      <span className={col.notNull ? "font-bold text-indigo-600 dark:text-indigo-400" : ""}>NN</span>
+                      <span className={col.notNull ? "font-bold text-app-accent-text" : ""}>NN</span>
                     </label>
 
                     <label className="flex items-center gap-1 cursor-pointer hover:text-sky-500" title="Unique">
@@ -308,7 +308,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
               <Button
                 type="submit"
                 disabled={!tableName.trim()}
-                className="h-9 px-5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-md"
+                className="h-9 px-5 bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-md cursor-pointer"
               >
                 Guardar Cambios
               </Button>
