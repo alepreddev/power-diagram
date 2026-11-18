@@ -33,8 +33,8 @@ export const APP_LEGAL_INFO: LegalOwnerInfo = {
   tagline: "ERD Studio & SQL Architect",
   copyrightYear: 2026,
   ownerName: "José Arocha",
-  brandName: null,
-  contactEmail: null,
+  brandName: "Power Diagram",
+  contactEmail: "ale050p@gmail.com",
   licenseName: "MIT",
   repositoryUrl: "https://github.com/alepreddev/power-diagram",
 };
