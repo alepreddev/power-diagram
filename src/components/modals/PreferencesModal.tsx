@@ -208,11 +208,11 @@ function CustomizePreferencesContent() {
                   <span className="text-xs font-semibold text-slate-900 dark:text-zinc-100 truncate">
                     {color.label}
                   </span>
-                  {color.isMonochrome && (
+                  {/* {color.isMonochrome && (
                     <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
                       Adaptable
                     </span>
-                  )}
+                  )} */}
                 </div>
 
                 {isSelected && (
@@ -225,7 +225,7 @@ function CustomizePreferencesContent() {
       </section>
 
       {/* 3. VISTA PREVIA INTERACTIVA */}
-      <section className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-950/60 p-4 space-y-3">
+      {/* <section className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-950/60 p-4 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-app-accent-text" />
@@ -239,7 +239,6 @@ function CustomizePreferencesContent() {
         </div>
 
         <div className="p-4 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex flex-wrap items-center gap-3">
-          {/* Botón principal */}
           <button
             type="button"
             className="h-8 px-4 rounded-lg bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
@@ -247,7 +246,6 @@ function CustomizePreferencesContent() {
             <span>Botón Principal</span>
           </button>
 
-          {/* Botón secundario con efecto hover */}
           <button
             type="button"
             className="h-8 px-3.5 rounded-lg border border-slate-300 dark:border-zinc-700 bg-transparent text-slate-700 dark:text-zinc-200 hover:text-app-accent-text hover:border-app-accent-border hover:bg-app-accent-subtle text-xs font-medium transition-colors cursor-pointer"
@@ -255,17 +253,15 @@ function CustomizePreferencesContent() {
             Hover Secundario
           </button>
 
-          {/* Insignia / Badge con acento */}
           <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-app-accent-subtle text-app-accent-text border border-app-accent-border">
             Insignia Activa
           </span>
 
-          {/* Enlace o texto con acento */}
           <span className="text-xs font-semibold text-app-accent-text cursor-pointer hover:underline">
             Enlace de Énfasis
           </span>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }
