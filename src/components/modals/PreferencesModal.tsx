@@ -7,7 +7,6 @@ import {
   Moon,
   Laptop,
   Check,
-  Sparkles,
   Info,
   SlidersHorizontal,
   ShieldCheck,
