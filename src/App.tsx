@@ -8,6 +8,20 @@ export default function App() {
 
   useEffect(() => {
     document.title = `Power Diagram v${__APP_VERSION__} - ERD Studio`;
+
+    // Desvanecer suavemente la pantalla de carga inicial una vez montada la aplicación
+    const splash = document.getElementById("app-splash");
+    if (splash) {
+      const timer = setTimeout(() => {
+        splash.classList.add("splash-fade-out");
+        const removeTimer = setTimeout(() => {
+          splash.remove();
+        }, 400);
+        return () => clearTimeout(removeTimer);
+      }, 350);
+
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   return activeProject ? <Workspace /> : <ProjectDashboard />;
