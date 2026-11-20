@@ -94,18 +94,36 @@ export function parseDbmlToGraph(
           y: Math.floor(tableIndex / 3) * 300 + 50,
         };
 
+        // Extraer PKs y UNIQUE de una sola columna declarados en bloques Indexes
+        const indexPkCols = new Set<string>();
+        const indexUniqueCols = new Set<string>();
+        for (const idx of table.indexes || []) {
+          const colNames = (idx.columns || [])
+            .map((c) => (typeof c.value === "string" ? c.value.trim().toLowerCase() : ""))
+            .filter(Boolean);
+          if (idx.pk) {
+            for (const c of colNames) indexPkCols.add(c);
+          }
+          if (idx.unique && colNames.length === 1) {
+            indexUniqueCols.add(colNames[0]);
+          }
+        }
+
         const columns: ColumnData[] = table.fields.map((field) => {
           let typeName = "text";
           if (field.type) {
             typeName = typeof field.type === "string" ? field.type : field.type.type_name || "text";
           }
+          const fieldLower = field.name.toLowerCase();
+          const isPk = Boolean(field.pk) || indexPkCols.has(fieldLower);
+          const isUnique = Boolean(field.unique) || indexUniqueCols.has(fieldLower);
 
           return {
             name: field.name,
             type: typeName,
-            pk: Boolean(field.pk),
-            unique: Boolean(field.unique),
-            notNull: Boolean(field.not_null),
+            pk: isPk,
+            unique: isUnique,
+            notNull: Boolean(field.not_null) || isPk,
             increment: Boolean(field.increment),
             note: field.note || undefined,
           };
@@ -206,6 +224,101 @@ export function parseDbmlToGraph(
 }
 
 /**
+ * Formatea un identificador (tabla o columna) para DBML, envolviéndolo en comillas
+ * dobles solo cuando contiene espacios o caracteres especiales.
+ */
+export function formatDbmlIdentifier(name: string): string {
+  const clean = name.trim();
+  if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(clean)) {
+    return clean;
+  }
+  const unquoted =
+    clean.startsWith('"') && clean.endsWith('"') ? clean.slice(1, -1).replace(/""/g, '"') : clean;
+  return `"${unquoted.replace(/"/g, '\\"')}"`;
+}
+
+/**
+ * Normaliza nombres de tipos SQL verbosos o específicos de motor a tipos DBML limpios,
+ * detectando también si el tipo lleva implícito el autoincremento.
+ */
+export function normalizeSqlTypeName(rawType: string): { type: string; isIncrement: boolean } {
+  let t = (rawType || "varchar").trim();
+  if (t.startsWith('"') && t.endsWith('"') && t.length >= 2) {
+    t = t.slice(1, -1).trim();
+  }
+
+  let isIncrement = false;
+  if (/\bIDENTITY\b/i.test(t) || /\bAUTO_?INCREMENT\b/i.test(t)) {
+    isIncrement = true;
+    t = t
+      .replace(/\s*\bIDENTITY\s*(?:\(\s*-?\d+\s*,\s*-?\d+\s*\))?/gi, "")
+      .replace(/\s*\bAUTO_?INCREMENT\b/gi, "")
+      .trim();
+  }
+
+  // Columnas calculadas en SQL Server (AS (...) PERSISTED)
+  if (/^AS\b/i.test(t)) {
+    return { type: "varchar", isIncrement: false };
+  }
+
+  // Quitar modificadores que rompen tipos de una sola palabra en DBML
+  t = t
+    .replace(/\s+\b(?:UNSIGNED|ZEROFILL|VARYING)\b/gi, (match) =>
+      /VARYING/i.test(match) ? match : ""
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Equivalencias estándar de tipos compuestos a tipos concisos compatibles con DBML
+  t = t
+    .replace(/^character\s+varying\b/i, "varchar")
+    .replace(/^char\s+varying\b/i, "varchar")
+    .replace(/^national\s+character\s+varying\b/i, "nvarchar")
+    .replace(/^national\s+varchar\b/i, "nvarchar")
+    .replace(/^national\s+character\b/i, "nchar")
+    .replace(/^character\b/i, "char")
+    .replace(/^timestamp\s+without\s+time\s+zone\b/i, "timestamp")
+    .replace(/^timestamp\s+with\s+time\s+zone\b/i, "timestamptz")
+    .replace(/^time\s+without\s+time\s+zone\b/i, "time")
+    .replace(/^time\s+with\s+time\s+zone\b/i, "timetz")
+    .replace(/^double\s+precision\b/i, "double")
+    .replace(/^long\s+varchar\b/i, "text")
+    .replace(/^long\s+varbinary\b/i, "blob")
+    .replace(/\s*\(\s*max\s*\)/gi, "(max)")
+    .replace(/\s*\(\s*([^)]*?)\s*\)/g, (_m, args: string) => `(${args.replace(/\s+/g, "")})`);
+
+  if (/^(?:small|big)?serial[248]?$/i.test(t)) {
+    isIncrement = true;
+  }
+
+  if (!t) t = "varchar";
+  return { type: t, isIncrement };
+}
+
+/**
+ * Formatea un tipo de columna para DBML. Si tras normalizar aún contiene espacios,
+ * lo envuelve entre comillas dobles para evitar errores sintácticos en el parser DBML.
+ */
+export function formatDbmlType(rawType: string): string {
+  const { type } = normalizeSqlTypeName(rawType);
+  if (/\s/.test(type) && !(type.startsWith('"') && type.endsWith('"'))) {
+    return `"${type.replace(/"/g, '\\"')}"`;
+  }
+  return type;
+}
+
+/**
+ * Limpia un texto de nota/comentario para insertarlo en `note: '...'` de una sola línea.
+ */
+function sanitizeNoteValue(note: string): string {
+  return note
+    .replace(/\\/g, "\\\\")
+    .replace(/'/g, "\\'")
+    .replace(/\s*\r?\n\s*/g, " ")
+    .trim();
+}
+
+/**
  * Genera el bloque de texto DBML para una tabla con opciones de settings (color, nota).
  */
 export function generateTableBlock(
@@ -216,7 +329,7 @@ export function generateTableBlock(
 ): string {
   const settings: string[] = [];
   if (headerColor) settings.push(`headercolor: ${headerColor}`);
-  if (note && note.trim()) settings.push(`note: '${note.replace(/'/g, "\\'")}'`);
+  if (note && note.trim()) settings.push(`note: '${sanitizeNoteValue(note)}'`);
   const settingsStr = settings.length > 0 ? ` [${settings.join(", ")}]` : "";
 
   const formattedColumns = columns
@@ -226,14 +339,16 @@ export function generateTableBlock(
       if (col.increment) constraints.push("increment");
       if (col.unique) constraints.push("unique");
       if (col.notNull) constraints.push("not null");
-      if (col.note) constraints.push(`note: '${col.note.replace(/'/g, "\\'")}'`);
+      if (col.note && col.note.trim()) constraints.push(`note: '${sanitizeNoteValue(col.note)}'`);
 
       const constraintStr = constraints.length > 0 ? ` [${constraints.join(", ")}]` : "";
-      return `  ${col.name} ${col.type || "varchar"}${constraintStr}`;
+      const colName = formatDbmlIdentifier(col.name);
+      const colType = formatDbmlType(col.type || "varchar");
+      return `  ${colName} ${colType}${constraintStr}`;
     })
     .join("\n");
 
-  return `Table ${tableName}${settingsStr} {\n${formattedColumns}\n}`;
+  return `Table ${formatDbmlIdentifier(tableName)}${settingsStr} {\n${formattedColumns}\n}`;
 }
 
 /**
