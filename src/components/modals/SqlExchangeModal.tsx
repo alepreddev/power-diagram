@@ -10,6 +10,8 @@ import {
   AlertCircle,
   Database,
   ArrowRight,
+  CheckCircle2,
+  Sparkles,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,7 +26,8 @@ import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import {
   exportDbmlToSql,
-  importSqlToDbml,
+  importSqlSchema,
+  detectSqlDialect,
   downloadTextFile,
   type ExportDialect,
   type ImportDialect,
@@ -41,8 +44,16 @@ const EXPORT_DIALECT_OPTIONS: readonly DbEngineOption<ExportDialect>[] = [
 const IMPORT_DIALECT_OPTIONS: readonly DbEngineOption<ImportDialect>[] = [
   { value: "postgres", label: "PostgreSQL DDL" },
   { value: "mysql", label: "MySQL DDL" },
+  { value: "sqlite", label: "SQLite DDL" },
   { value: "mssql", label: "SQL Server DDL" },
 ];
+
+const DIALECT_LABELS: Record<ImportDialect, string> = {
+  postgres: "PostgreSQL",
+  mysql: "MySQL",
+  sqlite: "SQLite",
+  mssql: "SQL Server",
+};
 
 interface SqlExchangeModalProps {
   open: boolean;
@@ -59,7 +70,7 @@ export function SqlExchangeModal({
   activeTab: controlledTab,
   onTabChange,
 }: SqlExchangeModalProps) {
-  const { dbmlCode, setDbmlCode, activeProject } = useDiagramStore();
+  const { dbmlCode, applyDbmlWithAutoLayout, activeProject } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
 
   const [internalTab, setInternalTab] = useState<"export" | "import">(defaultTab);
@@ -75,9 +86,11 @@ export function SqlExchangeModal({
 
   const [exportDialect, setExportDialect] = useState<ExportDialect>("postgres");
   const [importDialect, setImportDialect] = useState<ImportDialect>("postgres");
+  const [autoDetectedDialect, setAutoDetectedDialect] = useState<ImportDialect | null>(null);
   const [inputSql, setInputSql] = useState("");
   const [importMode, setImportMode] = useState<"replace" | "append">("replace");
   const [importError, setImportError] = useState<string | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Sincroniza la pestaña inicial y limpia errores previos cada vez que se abre la modal
@@ -99,6 +112,35 @@ export function SqlExchangeModal({
       return `-- Error al exportar: ${err instanceof Error ? err.message : String(err)}`;
     }
   }, [open, activeTab, dbmlCode, exportDialect]);
+
+  // Pre-análisis reactivo del script SQL para mostrar el resumen de tablas, relaciones y sentencias ignoradas
+  const importPreview = useMemo(() => {
+    if (!open || activeTab !== "import" || !inputSql.trim()) return null;
+    try {
+      return {
+        result: importSqlSchema(inputSql, importDialect, {
+          mode: importMode,
+          existingDbml: dbmlCode,
+        }),
+        error: null,
+      };
+    } catch (err: unknown) {
+      return {
+        result: null,
+        error: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }, [open, activeTab, inputSql, importDialect, importMode, dbmlCode]);
+
+  const handleSqlInputChange = (val: string) => {
+    setInputSql(val);
+    setImportError(null);
+    const detected = detectSqlDialect(val);
+    setAutoDetectedDialect(detected);
+    if (detected && detected !== importDialect) {
+      setImportDialect(detected);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(exportedSql);
@@ -126,29 +168,31 @@ export function SqlExchangeModal({
     const reader = new FileReader();
     reader.onload = (event) => {
       const content = event.target?.result as string;
-      if (content) setInputSql(content);
+      if (content) handleSqlInputChange(content);
     };
     reader.readAsText(file);
     e.target.value = "";
   };
 
-  const handleImportSubmit = () => {
+  const handleImportSubmit = async () => {
     setImportError(null);
-    if (!inputSql.trim()) return;
+    if (!inputSql.trim() || isImporting) return;
 
     try {
-      const convertedDbml = importSqlToDbml(inputSql, importDialect);
+      setIsImporting(true);
+      const { dbml } =
+        importPreview?.result ??
+        importSqlSchema(inputSql, importDialect, {
+          mode: importMode,
+          existingDbml: dbmlCode,
+        });
 
-      if (importMode === "replace") {
-        setDbmlCode(convertedDbml);
-      } else {
-        const combined = `${dbmlCode.trimEnd()}\n\n// Importado desde script SQL (${importDialect.toUpperCase()})\n${convertedDbml}`;
-        setDbmlCode(combined);
-      }
-
+      await applyDbmlWithAutoLayout(dbml);
       onOpenChange(false);
     } catch (err: unknown) {
       setImportError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -280,6 +324,15 @@ export function SqlExchangeModal({
                   options={IMPORT_DIALECT_OPTIONS}
                   triggerClassName="h-8 min-w-[195px] bg-white dark:bg-zinc-900 border-slate-300 dark:border-zinc-700/80"
                 />
+                {autoDetectedDialect && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-app-accent-soft text-app-accent-text border border-app-accent-border"
+                    title={`Dialecto detectado automáticamente: ${DIALECT_LABELS[autoDetectedDialect]}`}
+                  >
+                    <Sparkles className="w-3 h-3 shrink-0" />
+                    <span>Auto: {DIALECT_LABELS[autoDetectedDialect]}</span>
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -328,22 +381,69 @@ export function SqlExchangeModal({
                   value={inputSql}
                   height="100%"
                   theme={resolvedTheme}
-                  placeholder="Pega aquí tus instrucciones SQL (ej: CREATE TABLE users (...); o ALTER TABLE ...)"
+                  placeholder="Pega aquí tu script o dump SQL completo (se extraerán automáticamente solo CREATE TABLE y sus relaciones, ignorando configuraciones y datos)..."
                   extensions={[sql()]}
-                  onChange={(val) => setInputSql(val)}
+                  onChange={handleSqlInputChange}
                   className="text-[13px] font-mono h-full [&_.cm-editor]:h-full [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
                 />
               </div>
             </div>
 
-            {importError && (
-              <div className="p-3 bg-red-50 border border-red-200 dark:bg-red-950/70 dark:border-red-900/80 rounded-md text-xs text-red-700 dark:text-red-200 flex items-start gap-2 shrink-0">
-                <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
-                <span>{importError}</span>
+            {/* Resumen en vivo de tablas, relaciones y sentencias ignoradas */}
+            {importPreview?.result && (
+              <div className="p-2.5 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60 rounded-lg text-xs text-slate-700 dark:text-zinc-200 flex flex-col gap-1 shrink-0">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>
+                      Listo: {importPreview.result.report.tablesImported}{" "}
+                      {importPreview.result.report.tablesImported === 1 ? "tabla" : "tablas"} y{" "}
+                      {importPreview.result.report.relationshipsImported}{" "}
+                      {importPreview.result.report.relationshipsImported === 1
+                        ? "relación"
+                        : "relaciones"}
+                    </span>
+                  </span>
+
+                  {importPreview.result.report.ignoredStatementsTotal > 0 && (
+                    <span className="text-slate-500 dark:text-zinc-400">
+                      · Se ignoraron {importPreview.result.report.ignoredStatementsTotal}{" "}
+                      {importPreview.result.report.ignoredStatementsTotal === 1
+                        ? "sentencia ajena al esquema"
+                        : "sentencias ajenas al esquema"}{" "}
+                      (
+                      {importPreview.result.report.ignoredBreakdown
+                        .slice(0, 4)
+                        .map((item) => `${item.type} ×${item.count}`)
+                        .join(", ")}
+                      {importPreview.result.report.ignoredBreakdown.length > 4 ? "…" : ""})
+                    </span>
+                  )}
+                </div>
+
+                {importPreview.result.report.skippedDuplicateTables.length > 0 && (
+                  <div className="text-[11px] text-amber-700 dark:text-amber-400">
+                    Se omitirán {importPreview.result.report.skippedDuplicateTables.length}{" "}
+                    {importPreview.result.report.skippedDuplicateTables.length === 1
+                      ? "tabla que ya existe"
+                      : "tablas que ya existen"}{" "}
+                    en el diagrama:{" "}
+                    <span className="font-mono font-medium">
+                      {importPreview.result.report.skippedDuplicateTables.join(", ")}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800 shrink-0">
+            {(importError || importPreview?.error) && (
+              <div className="p-3 bg-red-50 border border-red-200 dark:bg-red-950/70 dark:border-red-900/80 rounded-md text-xs text-red-700 dark:text-red-200 flex items-start gap-2 shrink-0">
+                <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
+                <span>{importError || importPreview?.error}</span>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2.5 pt-2 shrink-0">
               <Button
                 type="button"
                 variant="ghost"
@@ -356,11 +456,11 @@ export function SqlExchangeModal({
               <Button
                 type="button"
                 onClick={handleImportSubmit}
-                disabled={!inputSql.trim()}
+                disabled={!inputSql.trim() || Boolean(importPreview?.error) || isImporting}
                 className="h-9 px-5 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast font-semibold gap-1.5 shadow-md cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>Convertir a Diagrama DBML</span>
+                <span>{isImporting ? "Organizando diagrama..." : "Convertir a Diagrama DBML"}</span>
                 <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
