@@ -15,13 +15,13 @@ export interface SaveFileOptions {
  * Retorna `true` si se guardó o `false` si el usuario canceló.
  */
 export async function saveFileCrossPlatform(
-  data: Blob | string,
+  data: Blob | Uint8Array | string,
   options: SaveFileOptions
 ): Promise<boolean> {
   const { defaultFilename, filterName, extensions, mimeType = "text/plain" } = options;
 
   if (isTauri()) {
-    const filePath = await save({
+    let filePath = await save({
       title: "Guardar archivo",
       defaultPath: defaultFilename,
       filters: [{ name: filterName, extensions }],
@@ -31,18 +31,35 @@ export async function saveFileCrossPlatform(
       return false;
     }
 
+    // Garantizar que la ruta tenga la extensión esperada si el usuario la borró en el diálogo
+    const primaryExt = extensions[0]?.toLowerCase();
+    if (
+      primaryExt &&
+      !extensions.some((ext) => filePath!.toLowerCase().endsWith(`.${ext.toLowerCase()}`))
+    ) {
+      filePath = `${filePath}.${primaryExt}`;
+    }
+
     if (typeof data === "string") {
       await invoke("save_text_file", { path: filePath, contents: data });
     } else {
-      const buffer = await data.arrayBuffer();
-      const bytes = Array.from(new Uint8Array(buffer));
-      await invoke("save_binary_file", { path: filePath, contents: bytes });
+      const byteView =
+        data instanceof Uint8Array ? data : new Uint8Array(await data.arrayBuffer());
+      if (byteView.byteLength === 0) {
+        throw new Error("El archivo generado está vacío (0 bytes).");
+      }
+      await invoke("save_binary_file", { path: filePath, contents: Array.from(byteView) });
     }
     return true;
   }
 
   // Fallback para navegador web
-  const blob = typeof data === "string" ? new Blob([data], { type: mimeType }) : data;
+  const blob =
+    typeof data === "string"
+      ? new Blob([data], { type: mimeType })
+      : data instanceof Uint8Array
+        ? new Blob([data.buffer as ArrayBuffer], { type: mimeType })
+        : data;
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
