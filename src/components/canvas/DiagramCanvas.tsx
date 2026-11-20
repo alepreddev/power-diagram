@@ -121,8 +121,16 @@ const INITIAL_FIT_VIEW_OPTIONS = { minZoom: 1, maxZoom: 1 };
 const FIT_VIEW_OPTIONS = { maxZoom: 1 };
 
 function CanvasContent() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, setNodes, saveToDatabase } =
-    useDiagramStore();
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    setNodes,
+    saveToDatabase,
+    layoutVersion,
+  } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
   const { fitView } = useReactFlow();
 
@@ -130,6 +138,14 @@ function CanvasContent() {
   const edgeTypes = useMemo(() => ({ relation: RelationshipEdgeMemo }), []);
 
   const isDark = resolvedTheme === "dark";
+
+  useEffect(() => {
+    if (layoutVersion === 0) return;
+    const timer = setTimeout(() => {
+      fitView({ duration: 400, ...FIT_VIEW_OPTIONS });
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [layoutVersion, fitView]);
 
   const handleAutoLayout = useCallback(async () => {
     if (nodes.length === 0) return;

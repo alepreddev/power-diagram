@@ -25,6 +25,7 @@ import {
   getDiagramByProjectId,
   saveDiagramState,
 } from "@/db/database";
+import { layoutDiagramWithElk } from "@/lib/autoLayout";
 
 let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -76,10 +77,14 @@ interface DiagramState {
   // Modal de edición de tabla
   editingTable: TableNodeData | null;
 
+  // Contador para disparar fitView tras un auto-layout externo (ej. importación SQL)
+  layoutVersion: number;
+
   // Acciones
   setActiveProject: (project: Project) => Promise<void>;
   closeProject: () => void;
   setDbmlCode: (code: string) => void;
+  applyDbmlWithAutoLayout: (code: string) => Promise<void>;
   onNodesChange: OnNodesChange<TableNode>;
   onEdgesChange: OnEdgesChange<TableEdge>;
   onConnect: (connection: Connection) => void;
@@ -122,6 +127,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     isSaving: false,
     lastSavedAt: null,
     editingTable: null,
+    layoutVersion: 0,
 
     setActiveProject: async (project: Project) => {
       try {
@@ -189,6 +195,21 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
       });
 
       scheduleAutoSave();
+    },
+
+    applyDbmlWithAutoLayout: async (code: string) => {
+      const { nodes, edges, error } = parseDbmlToGraph(code, []);
+      const arrangedNodes = nodes.length > 0 ? await layoutDiagramWithElk(nodes, edges) : nodes;
+
+      set((state) => ({
+        dbmlCode: code,
+        nodes: arrangedNodes,
+        edges,
+        syntaxError: error,
+        layoutVersion: state.layoutVersion + 1,
+      }));
+
+      await get().saveToDatabase();
     },
 
     onNodesChange: (changes) => {
