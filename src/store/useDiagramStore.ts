@@ -26,6 +26,7 @@ import {
   saveDiagramState,
 } from "@/db/database";
 import { layoutDiagramWithElk } from "@/lib/autoLayout";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -109,8 +110,13 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
   const scheduleAutoSave = () => {
     if (autoSaveTimer) {
       clearTimeout(autoSaveTimer);
+      autoSaveTimer = null;
     }
     set({ isDirty: true });
+
+    if (!useSettingsStore.getState().autoSave) {
+      return;
+    }
 
     autoSaveTimer = setTimeout(() => {
       get().saveToDatabase();
@@ -377,5 +383,20 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     setNodes: (nodes: TableNode[]) => set({ nodes }),
     setEdges: (edges: TableEdge[]) => set({ edges }),
   };
+});
+
+// Sincronizar cambios en la preferencia de autoguardado con el estado pendiente del diagrama
+useSettingsStore.subscribe((state, prevState) => {
+  if (state.autoSave === prevState.autoSave) return;
+
+  if (state.autoSave) {
+    const { activeProject, isDirty, isSaving, saveToDatabase } = useDiagramStore.getState();
+    if (activeProject && isDirty && !isSaving) {
+      void saveToDatabase();
+    }
+  } else if (autoSaveTimer) {
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = null;
+  }
 });
 
