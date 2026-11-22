@@ -11,7 +11,6 @@ import {
   Check,
   ChevronDown,
   SlidersHorizontal,
-  Settings,
   AlertTriangle,
 } from "lucide-react";
 import { useDiagramStore } from "@/store/useDiagramStore";
@@ -21,15 +20,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreateTableModal } from "@/components/modals/CreateTableModal";
 import { SqlExchangeModal } from "@/components/modals/SqlExchangeModal";
-import {
-  PreferencesModal,
-  type PreferenceSectionId,
-} from "@/components/modals/PreferencesModal";
+import { PreferencesModal } from "@/components/modals/PreferencesModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
 import { exportDiagramImage } from "@/lib/canvasExport";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -53,8 +48,6 @@ export function WorkspaceHeader() {
     tab: "export",
   });
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
-  const [preferencesSection, setPreferencesSection] =
-    useState<PreferenceSectionId>("customize");
   const [isUnsavedExitOpen, setIsUnsavedExitOpen] = useState(false);
   const [isExportingImage, setIsExportingImage] = useState(false);
   const [imageExported, setImageExported] = useState(false);
@@ -69,11 +62,6 @@ export function WorkspaceHeader() {
   }, []);
 
   if (!activeProject) return null;
-
-  const openPreferences = (section: PreferenceSectionId = "customize") => {
-    setPreferencesSection(section);
-    setIsPreferencesOpen(true);
-  };
 
   const handleBackToProjects = () => {
     if (isDirty) {
@@ -269,13 +257,6 @@ export function WorkspaceHeader() {
                     {autoSave ? t.workspace.autoSaveOn : t.workspace.autoSaveOff}
                   </span>
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem onSelect={() => openPreferences("settings")}>
-                  <Settings className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400 shrink-0" />
-                  <span>{t.workspace.openSaveSettings}</span>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -288,7 +269,7 @@ export function WorkspaceHeader() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => openPreferences("customize")}
+            onClick={() => setIsPreferencesOpen(true)}
             className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
             title={t.workspace.preferencesTitle}
             aria-label={t.workspace.preferencesTitle}
@@ -311,7 +292,6 @@ export function WorkspaceHeader() {
       <PreferencesModal
         open={isPreferencesOpen}
         onOpenChange={setIsPreferencesOpen}
-        defaultSection={preferencesSection}
       />
 
       <ConfirmDialog
