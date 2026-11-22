@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Trash2, ArrowRight, Pencil, LayoutGrid, List, Table2 } from "lucide-react";
+import { Plus, Trash2, ArrowRight, Pencil, LayoutGrid, List, Table2, Search, X } from "lucide-react";
 import { getProjects, deleteProject, type Project } from "@/db/database";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { DbEngineIcon } from "@/components/ui/DbEngineSelect";
 import { DashboardOptionsMenu } from "./DashboardOptionsMenu";
 import { CreateProjectModal } from "@/components/modals/CreateProjectModal";
@@ -338,6 +339,7 @@ export function ProjectDashboard() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [recentProjectIds, setRecentProjectIds] = useState<number[]>([]);
   const [viewMode, setViewMode] = useState<ProjectsViewMode>(getStoredProjectsViewMode);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -444,6 +446,12 @@ export function ProjectDashboard() {
     return result;
   }, [projects, recentProjectIds]);
 
+  const filteredProjects = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return projects;
+    return projects.filter((project) => project.name.toLowerCase().includes(query));
+  }, [projects, searchQuery]);
+
   return (
     <div className="h-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 flex flex-col transition-colors">
       {/* Barra de navegación superior */}
@@ -520,53 +528,79 @@ export function ProjectDashboard() {
 
         {/* Sección 2: Todos los proyectos registrados debajo (con scroll exclusivo) */}
         <section aria-labelledby="registered-projects-heading" className="flex-1 min-h-0 flex flex-col gap-3.5 pt-1">
-          <div className="flex items-center justify-between gap-3 shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 shrink-0">
             <h3
               id="registered-projects-heading"
               className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400"
             >
-              {t.dashboard.registeredProjectsTitle(projects.length)}
+              {t.dashboard.registeredProjectsTitle(filteredProjects.length)}
             </h3>
 
-            {/* Selector de formato de vista (Cuadrícula, Lista, Tabla) */}
-            <div
-              role="group"
-              aria-label={t.dashboard.viewModeLabel}
-              className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-slate-200/70 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800"
-            >
-              {(
-                [
-                  { id: "grid" as const, icon: LayoutGrid, label: t.dashboard.viewGrid },
-                  { id: "list" as const, icon: List, label: t.dashboard.viewList },
-                  { id: "table" as const, icon: Table2, label: t.dashboard.viewTable },
-                ] as const
-              ).map(({ id, icon: Icon, label }) => {
-                const active = viewMode === id;
-                return (
+            <div className="flex items-center gap-2">
+              {/* Buscador por título de proyecto */}
+              <div className="relative w-48 sm:w-60">
+                <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t.dashboard.searchPlaceholder}
+                  aria-label={t.dashboard.searchPlaceholder}
+                  className="h-8 pl-8 pr-7 text-xs bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 shadow-none"
+                />
+                {searchQuery && (
                   <button
-                    key={id}
                     type="button"
-                    aria-pressed={active}
-                    aria-label={label}
-                    title={label}
-                    onClick={() => handleChangeViewMode(id)}
-                    className={`h-7 w-7 inline-flex items-center justify-center rounded-md transition-all cursor-pointer ${
-                      active
-                        ? "bg-white dark:bg-zinc-800 text-app-accent-text shadow-xs"
-                        : "text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
-                    }`}
+                    onClick={() => setSearchQuery("")}
+                    aria-label={t.dashboard.clearSearch}
+                    title={t.dashboard.clearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-slate-400 hover:text-slate-700 dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors cursor-pointer"
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
-                );
-              })}
+                )}
+              </div>
+
+              {/* Selector de formato de vista (Cuadrícula, Lista, Tabla) */}
+              <div
+                role="group"
+                aria-label={t.dashboard.viewModeLabel}
+                className="inline-flex items-center gap-0.5 p-0.5 h-8 rounded-lg bg-slate-200/70 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shrink-0"
+              >
+                {(
+                  [
+                    { id: "grid" as const, icon: LayoutGrid, label: t.dashboard.viewGrid },
+                    { id: "list" as const, icon: List, label: t.dashboard.viewList },
+                    { id: "table" as const, icon: Table2, label: t.dashboard.viewTable },
+                  ] as const
+                ).map(({ id, icon: Icon, label }) => {
+                  const active = viewMode === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      aria-pressed={active}
+                      aria-label={label}
+                      title={label}
+                      onClick={() => handleChangeViewMode(id)}
+                      className={`h-full w-7 inline-flex items-center justify-center rounded-md transition-all cursor-pointer ${
+                        active
+                          ? "bg-white dark:bg-zinc-800 text-app-accent-text shadow-xs"
+                          : "text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          {!isLoading && projects.length > 0 && viewMode === "table" ? (
+          {!isLoading && filteredProjects.length > 0 && viewMode === "table" ? (
             <div className="flex-1 min-h-0 pb-8 flex flex-col">
               <ProjectTableView
-                projects={projects}
+                projects={filteredProjects}
                 onOpen={handleOpenProject}
                 onEdit={setEditingProject}
                 onDelete={setDeletingProject}
@@ -585,9 +619,24 @@ export function ProjectDashboard() {
                     {t.dashboard.emptySubtitle}
                   </p>
                 </div>
+              ) : filteredProjects.length === 0 ? (
+                <div className="text-center py-12 border border-dashed border-slate-200 dark:border-zinc-800/80 rounded-lg p-8 text-slate-500 dark:text-zinc-400 space-y-3">
+                  <p className="text-sm font-medium">
+                    {t.dashboard.noSearchResults(searchQuery.trim())}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSearchQuery("")}
+                    className="h-8 text-xs cursor-pointer"
+                  >
+                    {t.dashboard.clearSearch}
+                  </Button>
+                </div>
               ) : viewMode === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projects.map((project) => (
+                  {filteredProjects.map((project) => (
                     <ProjectCard
                       key={project.id}
                       project={project}
@@ -599,7 +648,7 @@ export function ProjectDashboard() {
                 </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {projects.map((project) => (
+                  {filteredProjects.map((project) => (
                     <ProjectListItem
                       key={project.id}
                       project={project}

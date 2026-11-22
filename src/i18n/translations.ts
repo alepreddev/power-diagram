@@ -84,6 +84,9 @@ const es = {
     tableColEngine: "Motor",
     tableColCreated: "Creado",
     tableColActions: "Acciones",
+    searchPlaceholder: "Buscar proyecto...",
+    clearSearch: "Limpiar búsqueda",
+    noSearchResults: (query: string) => `No se encontraron proyectos para «${query}».`,
   },
   optionsMenu: {
     optionsTitle: "Opciones",
@@ -387,6 +390,9 @@ const en: Translations = {
     tableColEngine: "Engine",
     tableColCreated: "Created",
     tableColActions: "Actions",
+    searchPlaceholder: "Search project...",
+    clearSearch: "Clear search",
+    noSearchResults: (query: string) => `No projects found matching "${query}".`,
   },
   optionsMenu: {
     optionsTitle: "Options",
