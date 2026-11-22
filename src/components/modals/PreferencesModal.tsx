@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { isTauri } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import {
@@ -9,6 +9,9 @@ import {
   Check,
   Info,
   SlidersHorizontal,
+  Settings,
+  Save,
+  Languages,
   ShieldCheck,
   Scale,
   FileText,
@@ -28,31 +31,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useSettingsStore, useTranslation } from "@/store/useSettingsStore";
 import { ACCENT_COLORS } from "@/config/themes";
+import { LANGUAGE_OPTIONS, type AppLanguage } from "@/i18n/translations";
 import {
   APP_LEGAL_INFO,
-  DISCLAIMER_PARAGRAPHS,
   MIT_LICENSE_TEXT,
-  PRIVACY_POLICY_ITEMS,
   THIRD_PARTY_LICENSES,
 } from "@/config/legal";
 
-type PreferenceSectionId = "customize" | "about";
-
-interface PreferenceSection {
-  id: PreferenceSectionId;
-  label: string;
-  icon: typeof Palette | typeof Info;
-}
-
-const PREFERENCE_SECTIONS: readonly PreferenceSection[] = [
-  { id: "customize", label: "Personalizar", icon: Palette },
-  { id: "about", label: "Acerca de", icon: Info },
-];
+export type PreferenceSectionId = "customize" | "settings" | "about";
 
 interface PreferencesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultSection?: PreferenceSectionId;
 }
 
 async function openExternalLink(url: string) {
@@ -70,24 +63,25 @@ async function openExternalLink(url: string) {
 /** Sección de Personalización: Modo claro/oscuro y Color general de la app */
 function CustomizePreferencesContent() {
   const { theme, setTheme, accentColor, setAccentColor } = useThemeStore();
+  const { t } = useTranslation();
 
   const themeOptions = [
     {
       id: "light" as const,
-      label: "Claro",
-      description: "Fondo blanco limpio para entornos iluminados",
+      label: t.preferences.customize.themes.light.label,
+      description: t.preferences.customize.themes.light.description,
       icon: Sun,
     },
     {
       id: "dark" as const,
-      label: "Oscuro",
-      description: "Tonos oscuros relajantes para reducir la fatiga visual",
+      label: t.preferences.customize.themes.dark.label,
+      description: t.preferences.customize.themes.dark.description,
       icon: Moon,
     },
     {
       id: "system" as const,
-      label: "Sistema",
-      description: "Sincronizado con la preferencia del sistema operativo",
+      label: t.preferences.customize.themes.system.label,
+      description: t.preferences.customize.themes.system.description,
       icon: Laptop,
     },
   ];
@@ -97,10 +91,10 @@ function CustomizePreferencesContent() {
       {/* Encabezado */}
       <div>
         <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">
-          Personalización
+          {t.preferences.customize.title}
         </h3>
         <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-          Ajusta el modo de apariencia y el color general de acento aplicado a los botones, enlaces y efectos visuales de la aplicación.
+          {t.preferences.customize.description}
         </p>
       </div>
 
@@ -109,7 +103,7 @@ function CustomizePreferencesContent() {
         <div className="flex items-center gap-2">
           <Sun className="w-4 h-4 text-app-accent-text shrink-0" />
           <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-            Modo de Apariencia
+            {t.preferences.customize.appearanceModeTitle}
           </h4>
         </div>
 
@@ -158,27 +152,28 @@ function CustomizePreferencesContent() {
           <div className="flex items-center gap-2">
             <Palette className="w-4 h-4 text-app-accent-text shrink-0" />
             <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-              Color General de la App
+              {t.preferences.customize.accentColorTitle}
             </h4>
           </div>
           <span className="text-[11px] text-slate-400 dark:text-zinc-500">
-            {ACCENT_COLORS.length} colores disponibles
+            {t.preferences.customize.availableColors(ACCENT_COLORS.length)}
           </span>
         </div>
 
         <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-          Configura el color principal de los botones de acción, estados seleccionados y efectos de hover en toda la interfaz.
+          {t.preferences.customize.accentColorDescription}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
           {ACCENT_COLORS.map((color) => {
             const isSelected = accentColor === color.id;
+            const localizedAccent = t.preferences.customize.accents[color.id];
             return (
               <button
                 key={color.id}
                 type="button"
                 onClick={() => setAccentColor(color.id)}
-                title={`${color.label}: ${color.description}`}
+                title={`${localizedAccent.label}: ${localizedAccent.description}`}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all cursor-pointer min-h-[46px] ${
                   isSelected
                     ? "bg-app-accent-subtle border-app-accent-border ring-1 ring-app-accent-ring shadow-xs"
@@ -188,10 +183,7 @@ function CustomizePreferencesContent() {
                 {/* Muestra de color (Swatch) */}
                 <div className="relative shrink-0">
                   {color.isMonochrome ? (
-                    /* Monocromo: Círculo dividido blanco/oscuro para representar su adaptación */
-                    <div
-                      className="w-6 h-6 rounded-full border border-slate-300 dark:border-zinc-600 shadow-xs overflow-hidden flex"
-                    >
+                    <div className="w-6 h-6 rounded-full border border-slate-300 dark:border-zinc-600 shadow-xs overflow-hidden flex">
                       <div className="w-1/2 h-full bg-[#18181b]" />
                       <div className="w-1/2 h-full bg-[#ffffff]" />
                     </div>
@@ -205,13 +197,8 @@ function CustomizePreferencesContent() {
 
                 <div className="min-w-0 flex-1 flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-slate-900 dark:text-zinc-100 truncate">
-                    {color.label}
+                    {localizedAccent.label}
                   </span>
-                  {/* {color.isMonochrome && (
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
-                      Adaptable
-                    </span>
-                  )} */}
                 </div>
 
                 {isSelected && (
@@ -222,45 +209,167 @@ function CustomizePreferencesContent() {
           })}
         </div>
       </section>
+    </div>
+  );
+}
 
-      {/* 3. VISTA PREVIA INTERACTIVA */}
-      {/* <section className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-950/60 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-app-accent-text" />
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
-              Vista Previa de Componentes
-            </h4>
+/** Sección de Configuración: Autoguardado e Idioma del Sistema */
+function SettingsPreferencesContent() {
+  const autoSave = useSettingsStore((state) => state.autoSave);
+  const setAutoSave = useSettingsStore((state) => state.setAutoSave);
+  const { t, language, setLanguage } = useTranslation();
+
+  return (
+    <div className="space-y-6">
+      {/* Encabezado */}
+      <div>
+        <h3 className="text-base font-bold text-slate-900 dark:text-zinc-100">
+          {t.preferences.settings.title}
+        </h3>
+        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+          {t.preferences.settings.description}
+        </p>
+      </div>
+
+      {/* 1. AUTOGUARDADO */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Save className="w-4 h-4 text-app-accent-text shrink-0" />
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+            {t.preferences.settings.autoSaveSectionTitle}
+          </h4>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 flex items-center justify-between gap-4">
+          <div className="space-y-1.5 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-slate-900 dark:text-zinc-100">
+                {t.preferences.settings.autoSaveLabel}
+              </span>
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                  autoSave
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
+                    : "bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 border-slate-200 dark:border-zinc-700"
+                }`}
+              >
+                {autoSave ? t.common.active : t.common.disabled}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+              {t.preferences.settings.autoSaveDescription}
+            </p>
           </div>
-          <span className="text-[11px] text-slate-400 dark:text-zinc-500">
-            Prueba los botones y efectos en tiempo real
-          </span>
-        </div>
-
-        <div className="p-4 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="h-8 px-4 rounded-lg bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
-          >
-            <span>Botón Principal</span>
-          </button>
 
           <button
             type="button"
-            className="h-8 px-3.5 rounded-lg border border-slate-300 dark:border-zinc-700 bg-transparent text-slate-700 dark:text-zinc-200 hover:text-app-accent-text hover:border-app-accent-border hover:bg-app-accent-subtle text-xs font-medium transition-colors cursor-pointer"
+            role="switch"
+            aria-checked={autoSave}
+            aria-label={t.preferences.settings.autoSaveSwitchAria}
+            onClick={() => setAutoSave(!autoSave)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent-ring ${
+              autoSave
+                ? "bg-app-accent border-app-accent"
+                : "bg-slate-200 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700"
+            }`}
           >
-            Hover Secundario
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full shadow-sm transition-transform duration-200 ${
+                autoSave
+                  ? "translate-x-6 bg-app-accent-contrast"
+                  : "translate-x-1 bg-white dark:bg-zinc-300"
+              }`}
+            />
           </button>
-
-          <span className="px-2.5 py-1 rounded-md text-xs font-medium bg-app-accent-subtle text-app-accent-text border border-app-accent-border">
-            Insignia Activa
-          </span>
-
-          <span className="text-xs font-semibold text-app-accent-text cursor-pointer hover:underline">
-            Enlace de Énfasis
-          </span>
         </div>
-      </section> */}
+      </section>
+
+      {/* 2. IDIOMA DEL SISTEMA */}
+      <section className="space-y-3">
+        <div className="flex items-center gap-2">
+          <Languages className="w-4 h-4 text-app-accent-text shrink-0" />
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-zinc-300">
+            {t.preferences.settings.languageSectionTitle}
+          </h4>
+        </div>
+
+        <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+          {t.preferences.settings.languageDescription}
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {LANGUAGE_OPTIONS.map((opt) => {
+            const isSelected = opt.available && language === opt.id;
+            const localizedName = opt.labels[language];
+
+            if (!opt.available) {
+              return (
+                <div
+                  key={opt.id}
+                  aria-disabled="true"
+                  className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800/90 bg-slate-50/70 dark:bg-zinc-950/50 opacity-70 cursor-not-allowed select-none"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-8 h-8 rounded-lg bg-slate-200/70 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 text-[11px] font-mono font-bold flex items-center justify-center shrink-0">
+                      {opt.code}
+                    </span>
+                    <div className="min-w-0">
+                      <span className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">
+                        {opt.nativeName}
+                      </span>
+                      <span className="block text-[11px] text-slate-400 dark:text-zinc-500 truncate">
+                        {localizedName}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 shrink-0">
+                    {t.common.comingSoon}
+                  </span>
+                </div>
+              );
+            }
+
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => setLanguage(opt.id as AppLanguage)}
+                className={`flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border text-left transition-all cursor-pointer ${
+                  isSelected
+                    ? "bg-app-accent-subtle border-app-accent-border ring-1 ring-app-accent-ring shadow-xs"
+                    : "bg-white dark:bg-zinc-900/60 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <span
+                    className={`w-8 h-8 rounded-lg text-[11px] font-mono font-bold flex items-center justify-center shrink-0 transition-colors ${
+                      isSelected
+                        ? "bg-app-accent text-app-accent-contrast"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                    }`}
+                  >
+                    {opt.code}
+                  </span>
+                  <div className="min-w-0">
+                    <span className="block text-xs font-semibold text-slate-900 dark:text-zinc-100 truncate">
+                      {opt.nativeName}
+                    </span>
+                    <span className="block text-[11px] text-slate-500 dark:text-zinc-400 truncate">
+                      {localizedName}
+                    </span>
+                  </div>
+                </div>
+
+                {isSelected && (
+                  <span className="w-5 h-5 rounded-full bg-app-accent text-app-accent-contrast flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 stroke-[2.5]" />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
@@ -269,6 +378,7 @@ function CustomizePreferencesContent() {
 function AboutPreferencesContent() {
   const [licenseSearch, setLicenseSearch] = useState("");
   const [showMitText, setShowMitText] = useState(false);
+  const { t } = useTranslation();
 
   const filteredLicenses = useMemo(() => {
     const q = licenseSearch.trim().toLowerCase();
@@ -302,7 +412,7 @@ function AboutPreferencesContent() {
                   v{__APP_VERSION__}
                 </span>
                 <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                  Open Source · {APP_LEGAL_INFO.licenseName}
+                  {t.preferences.about.openSourceBadge(APP_LEGAL_INFO.licenseName)}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
@@ -312,11 +422,11 @@ function AboutPreferencesContent() {
           </div>
         </div>
 
-        {/* Metadatos legales, propietario, espacio futuro para marca/correo y repo */}
+        {/* Metadatos legales, propietario, marca, correo y repo */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-zinc-800/80 text-xs">
           <div className="space-y-1">
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-              Copyright y Titular
+              {t.preferences.about.copyrightTitle}
             </span>
             <p className="font-medium text-slate-800 dark:text-zinc-200">
               © {APP_LEGAL_INFO.copyrightYear} {APP_LEGAL_INFO.ownerName}
@@ -326,17 +436,17 @@ function AboutPreferencesContent() {
           <div className="space-y-1">
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1">
               <Tag className="w-3 h-3" />
-              Marca
+              {t.preferences.about.brandTitle}
             </span>
             <p className="text-slate-500 dark:text-zinc-400">
-              {APP_LEGAL_INFO.brandName ?? "Autor independiente (por definir)"}
+              {APP_LEGAL_INFO.brandName ?? t.preferences.about.independentAuthor}
             </p>
           </div>
 
           <div className="space-y-1">
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1">
               <Mail className="w-3 h-3" />
-              Correo de contacto
+              {t.preferences.about.contactEmailTitle}
             </span>
             {APP_LEGAL_INFO.contactEmail ? (
               <button
@@ -348,7 +458,7 @@ function AboutPreferencesContent() {
               </button>
             ) : (
               <p className="text-slate-500 dark:text-zinc-400 italic">
-                Disponible próximamente al definir marca
+                {t.preferences.about.emailPending}
               </p>
             )}
           </div>
@@ -356,7 +466,7 @@ function AboutPreferencesContent() {
           <div className="space-y-1">
             <span className="text-[11px] font-medium uppercase tracking-wider text-slate-400 dark:text-zinc-500 flex items-center gap-1">
               <Globe className="w-3 h-3" />
-              Repositorio oficial
+              {t.preferences.about.repositoryTitle}
             </span>
             <div>
               <button
@@ -379,7 +489,7 @@ function AboutPreferencesContent() {
             className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 dark:text-zinc-300 hover:text-app-accent-text transition-colors cursor-pointer"
           >
             <FileText className="w-3.5 h-3.5" />
-            <span>{showMitText ? "Ocultar texto de Licencia MIT" : "Ver texto completo de Licencia MIT"}</span>
+            <span>{showMitText ? t.preferences.about.hideMit : t.preferences.about.showMit}</span>
             {showMitText ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
 
@@ -397,16 +507,16 @@ function AboutPreferencesContent() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
             <h4 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
-              Política de Privacidad Local
+              {t.preferences.about.privacyTitle}
             </h4>
           </div>
           <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
-            100 % Offline-First
+            {t.preferences.about.offlineBadge}
           </span>
         </div>
 
         <div className="grid grid-cols-1 gap-2.5">
-          {PRIVACY_POLICY_ITEMS.map((item) => (
+          {t.preferences.about.privacyItems.map((item) => (
             <div
               key={item.title}
               className="rounded-lg border border-slate-200 dark:border-zinc-800/90 bg-white dark:bg-zinc-900/60 p-3"
@@ -427,12 +537,12 @@ function AboutPreferencesContent() {
         <div className="flex items-center gap-2">
           <Scale className="w-4 h-4 text-amber-500 shrink-0" />
           <h4 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
-            Exención de Responsabilidad y Aviso de Marcas
+            {t.preferences.about.disclaimerTitle}
           </h4>
         </div>
 
         <div className="rounded-xl border border-slate-200 dark:border-zinc-800/90 bg-white dark:bg-zinc-900/60 p-4 space-y-2.5">
-          {DISCLAIMER_PARAGRAPHS.map((paragraph, idx) => (
+          {t.preferences.about.disclaimerParagraphs.map((paragraph, idx) => (
             <p
               key={idx}
               className="text-xs text-slate-600 dark:text-zinc-400 leading-relaxed"
@@ -449,17 +559,17 @@ function AboutPreferencesContent() {
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-app-accent-text shrink-0" />
             <h4 className="text-sm font-semibold text-slate-900 dark:text-zinc-100">
-              Licencias de Terceros ({filteredLicenses.length})
+              {t.preferences.about.thirdPartyTitle}
             </h4>
           </div>
 
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-56">
             <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <Input
               value={licenseSearch}
               onChange={(e) => setLicenseSearch(e.target.value)}
-              placeholder="Filtrar librería o licencia..."
-              className="h-8 pl-8 text-xs bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
+              placeholder={t.preferences.about.searchLicensesPlaceholder}
+              className="h-8 pl-8 text-xs bg-white dark:bg-zinc-950 border-slate-200 dark:border-zinc-800"
             />
           </div>
         </div>
@@ -479,7 +589,7 @@ function AboutPreferencesContent() {
                     {item.version}
                   </span>
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400">
-                    {item.layer}
+                    {t.preferences.about.layers[item.layer]}
                   </span>
                 </div>
 
@@ -513,7 +623,7 @@ function AboutPreferencesContent() {
 
           {filteredLicenses.length === 0 && (
             <div className="rounded-lg border border-dashed border-slate-200 dark:border-zinc-800 p-4 text-center text-xs text-slate-500 dark:text-zinc-400">
-              No se encontraron librerías para «{licenseSearch}».
+              {t.preferences.about.noLicensesFound(licenseSearch)}
             </div>
           )}
         </div>
@@ -522,15 +632,32 @@ function AboutPreferencesContent() {
   );
 }
 
-/** Modal de Preferencias con sidebar lateral de categorías ("Personalizar" y "Acerca de"). */
-export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) {
-  const [activeSection, setActiveSection] = useState<PreferenceSectionId>("customize");
+/** Modal de Preferencias con sidebar lateral ("Personalizar", "Configuración" y "Acerca de"). */
+export function PreferencesModal({
+  open,
+  onOpenChange,
+  defaultSection = "customize",
+}: PreferencesModalProps) {
+  const [activeSection, setActiveSection] = useState<PreferenceSectionId>(defaultSection);
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    if (open) {
+      setActiveSection(defaultSection);
+    }
+  }, [open, defaultSection]);
+
+  const sections = [
+    { id: "customize" as const, label: t.preferences.tabs.customize, icon: Palette },
+    { id: "settings" as const, label: t.preferences.tabs.settings, icon: Settings },
+    { id: "about" as const, label: t.preferences.tabs.about, icon: Info },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] max-w-4xl sm:max-w-4xl h-[84vh] max-h-[720px] p-0 pb-0 gap-0 overflow-hidden flex flex-col bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800">
         <DialogDescription className="sr-only">
-          Preferencias de Power Diagram
+          {t.preferences.srDescription}
         </DialogDescription>
 
         <div className="flex-1 min-h-0 flex flex-col sm:flex-row overflow-hidden">
@@ -540,12 +667,12 @@ export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) 
               <div className="flex items-center gap-2 px-2 pt-1 pr-10 sm:pr-2">
                 <SlidersHorizontal className="w-4 h-4 text-slate-600 dark:text-zinc-300 shrink-0" />
                 <DialogTitle className="text-sm font-bold text-slate-900 dark:text-zinc-100">
-                  Preferencias
+                  {t.preferences.title}
                 </DialogTitle>
               </div>
 
-              <nav aria-label="Categorías de preferencias" className="flex sm:flex-col gap-1">
-                {PREFERENCE_SECTIONS.map((section) => {
+              <nav aria-label={t.preferences.navAria} className="flex sm:flex-col gap-1">
+                {sections.map((section) => {
                   const Icon = section.icon;
                   const isActive = activeSection === section.id;
                   return (
@@ -568,7 +695,7 @@ export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) 
             </div>
 
             <p className="hidden sm:block px-2 pt-2 border-t border-slate-200/80 dark:border-zinc-800/80 text-[11px] text-slate-400 dark:text-zinc-500">
-              Personalización y configuración general.
+              {t.preferences.footerNote}
             </p>
           </aside>
 
@@ -578,6 +705,7 @@ export function PreferencesModal({ open, onOpenChange }: PreferencesModalProps) 
             <div className="hidden sm:block h-10 shrink-0" aria-hidden="true" />
             <main className="flex-1 min-w-0 overflow-y-auto px-5 sm:px-6 pb-6 pt-4 sm:pt-1">
               {activeSection === "customize" && <CustomizePreferencesContent />}
+              {activeSection === "settings" && <SettingsPreferencesContent />}
               {activeSection === "about" && <AboutPreferencesContent />}
             </main>
           </div>
