@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Settings, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useTranslation } from "@/store/useSettingsStore";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import { PreferencesModal } from "@/components/modals/PreferencesModal";
 /** Menú de opciones del Dashboard (Cambio de color y Preferencias). */
 export function DashboardOptionsMenu() {
   const { resolvedTheme, toggleTheme } = useThemeStore();
+  const { t } = useTranslation();
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const isDark = resolvedTheme === "dark";
 
@@ -25,8 +27,8 @@ export function DashboardOptionsMenu() {
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-            title="Opciones"
-            aria-label="Opciones del dashboard"
+            title={t.optionsMenu.optionsTitle}
+            aria-label={t.optionsMenu.optionsAria}
           >
             <Settings className="w-4 h-4 transition-transform duration-200 hover:rotate-45" />
           </Button>
@@ -43,10 +45,10 @@ export function DashboardOptionsMenu() {
               ) : (
                 <Moon className="w-4 h-4 text-app-accent-text shrink-0" />
               )}
-              <span>Cambio de color</span>
+              <span>{t.optionsMenu.colorMode}</span>
             </span>
             <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400">
-              {isDark ? "Claro" : "Oscuro"}
+              {isDark ? t.optionsMenu.light : t.optionsMenu.dark}
             </span>
           </DropdownMenuItem>
 
@@ -54,7 +56,7 @@ export function DashboardOptionsMenu() {
 
           <DropdownMenuItem onSelect={() => setIsPreferencesOpen(true)}>
             <SlidersHorizontal className="w-4 h-4 text-slate-500 dark:text-zinc-400 shrink-0" />
-            <span>Preferencias</span>
+            <span>{t.optionsMenu.preferences}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DbEngineSelect } from "@/components/ui/DbEngineSelect";
 import { createProject, type Project } from "@/db/database";
+import { useTranslation } from "@/store/useSettingsStore";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -42,17 +43,19 @@ export function ProjectFormFields({
   onNameChange,
   engine,
   onEngineChange,
-  placeholder = "ej. Sistema de Facturación, E-commerce, CRM Ventas",
+  placeholder,
 }: ProjectFormFieldsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       {/* Nombre del proyecto */}
       <div className="space-y-2.5">
         <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
-          Nombre del Proyecto / Base de Datos
+          {t.modals.projectForm.nameLabel}
         </label>
         <Input
-          placeholder={placeholder}
+          placeholder={placeholder ?? t.modals.projectForm.namePlaceholder}
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
           className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-10 w-full shadow-sm"
@@ -64,7 +67,7 @@ export function ProjectFormFields({
       {/* Selector de Motor de Base de Datos */}
       <div className="space-y-2.5">
         <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300">
-          Motor de Base de Datos
+          {t.modals.projectForm.engineLabel}
         </label>
         <DbEngineSelect
           value={engine}
@@ -81,6 +84,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
   const [name, setName] = useState("");
   const [engine, setEngine] = useState<EngineType>("postgres");
   const [isCreating, setIsCreating] = useState(false);
+  const { t } = useTranslation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,10 +120,10 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
             </div>
             <div>
               <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-                Crear Nuevo Proyecto ERD
+                {t.modals.createProject.title}
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                Define el nombre y el motor para inicializar tu nuevo esquema de base de datos.
+                {t.modals.createProject.description}
               </DialogDescription>
             </div>
           </div>
@@ -140,7 +144,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
               onClick={() => onOpenChange(false)}
               className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
             >
-              Cancelar
+              {t.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -148,7 +152,7 @@ export function CreateProjectModal({ open, onOpenChange, onSuccess }: CreateProj
               className="h-9 px-5 bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-md gap-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>{isCreating ? "Creando..." : "Crear Proyecto"}</span>
+              <span>{isCreating ? t.modals.createProject.submitting : t.modals.createProject.submit}</span>
             </Button>
           </DialogFooter>
         </form>

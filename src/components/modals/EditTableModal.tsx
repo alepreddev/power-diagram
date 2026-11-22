@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDiagramStore } from "@/store/useDiagramStore";
+import { useTranslation } from "@/store/useSettingsStore";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
 import type { ColumnData, TableNodeData } from "@/lib/dbmlParser";
 
@@ -42,6 +43,7 @@ const COMMON_SQL_TYPES = [
 
 export function EditTableModal({ open, onOpenChange, tableData }: EditTableModalProps) {
   const { updateTable, deleteTable } = useDiagramStore();
+  const { t } = useTranslation();
 
   const [activeTable, setActiveTable] = useState<TableNodeData | null>(tableData);
   const [tableName, setTableName] = useState("");
@@ -121,11 +123,11 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
           <div className="flex items-center gap-2">
             <Database className="w-5 h-5 text-app-accent-text" />
             <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-              Editar Tabla: <span className="text-app-accent-text font-mono">{currentTable.label}</span>
+              {t.modals.tableModal.editTitlePrefix} <span className="text-app-accent-text font-mono">{currentTable.label}</span>
             </DialogTitle>
           </div>
           <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400">
-            Modifica el nombre, color de acento, descripción y columnas. Todos los cambios se reflejarán en el código DBML y el lienzo automáticamente.
+            {t.modals.tableModal.editDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -133,9 +135,9 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
           {/* Nombre y Color */}
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
             <div className="sm:col-span-8 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Nombre de la Tabla</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{t.modals.tableModal.tableNameLabel}</label>
               <Input
-                placeholder="Nombre de la tabla"
+                placeholder={t.modals.tableModal.editTableNamePlaceholder}
                 value={tableName}
                 onChange={(e) => setTableName(e.target.value)}
                 className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-9 w-full shadow-sm"
@@ -144,7 +146,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
             </div>
 
             <div className="sm:col-span-4 space-y-1.5">
-              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Color de Acento</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{t.modals.tableModal.accentColorLabel}</label>
               <div className="flex items-center gap-2 h-9 px-3 bg-slate-50 dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-md">
                 {COLOR_PRESETS.map((c) => (
                   <button
@@ -164,9 +166,9 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
 
           {/* Descripción / Nota de la tabla */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">Descripción / Nota (Opcional)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-zinc-300">{t.modals.tableModal.noteLabel}</label>
             <Input
-              placeholder="ej. Almacena las publicaciones principales creadas por los usuarios"
+              placeholder={t.modals.tableModal.notePlaceholder}
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-8 w-full placeholder:text-slate-400 dark:placeholder:text-zinc-500 shadow-sm"
@@ -177,7 +179,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
           <div className="space-y-2">
             <div className="flex items-center justify-between pb-1">
               <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300">
-                Columnas / Campos ({columns.length})
+                {t.modals.tableModal.columnsTitle(columns.length)}
               </span>
               <Button
                 type="button"
@@ -187,16 +189,16 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                 className="h-7 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5 text-app-accent-text" />
-                <span>Agregar Columna</span>
+                <span>{t.modals.tableModal.addColumn}</span>
               </Button>
             </div>
 
             {/* Cabecera visual de columnas */}
             <div className="hidden sm:grid grid-cols-12 gap-2 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
-              <span className="col-span-5">Nombre de Columna</span>
-              <span className="col-span-3">Tipo SQL</span>
-              <span className="col-span-3 text-center">Restricciones</span>
-              <span className="col-span-1 text-right">Borrar</span>
+              <span className="col-span-5">{t.modals.tableModal.colHeaderName}</span>
+              <span className="col-span-3">{t.modals.tableModal.colHeaderType}</span>
+              <span className="col-span-3 text-center">{t.modals.tableModal.colHeaderConstraints}</span>
+              <span className="col-span-1 text-right">{t.modals.tableModal.colHeaderDelete}</span>
             </div>
 
             <div className="max-h-60 overflow-y-auto space-y-2 pr-1 border border-slate-200 dark:border-zinc-800 rounded-lg p-2.5 bg-slate-50/50 dark:bg-zinc-950/70">
@@ -208,7 +210,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                   {/* Nombre del campo */}
                   <div className="sm:col-span-5">
                     <Input
-                      placeholder="Nombre campo"
+                      placeholder={t.modals.tableModal.editColNamePlaceholder}
                       value={col.name}
                       onChange={(e) => handleColumnChange(idx, "name", e.target.value)}
                       className="bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800 text-slate-900 dark:text-zinc-100 text-xs h-8 px-2.5 w-full font-medium"
@@ -274,7 +276,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                       onClick={() => handleRemoveColumn(idx)}
                       disabled={columns.length <= 1}
                       className="h-8 w-8 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded-md disabled:opacity-20"
-                      title="Eliminar columna"
+                      title={t.modals.tableModal.deleteColumnTitle}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -293,7 +295,7 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
               className="h-9 px-3.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-500/10 gap-1.5 self-start sm:self-auto"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Eliminar Tabla</span>
+              <span>{t.modals.tableModal.deleteTableBtn}</span>
             </Button>
 
             <div className="flex items-center gap-2.5 self-end sm:self-auto">
@@ -303,14 +305,14 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
                 onClick={() => onOpenChange(false)}
                 className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
               >
-                Cancelar
+                {t.common.cancel}
               </Button>
               <Button
                 type="submit"
                 disabled={!tableName.trim()}
                 className="h-9 px-5 bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-md cursor-pointer"
               >
-                Guardar Cambios
+                {t.common.saveChanges}
               </Button>
             </div>
           </DialogFooter>
@@ -321,9 +323,9 @@ export function EditTableModal({ open, onOpenChange, tableData }: EditTableModal
     <ConfirmDialog
       open={isDeleteConfirmOpen}
       onOpenChange={setIsDeleteConfirmOpen}
-      title="Eliminar Tabla"
-      description={`¿Estás seguro de que deseas eliminar la tabla "${currentTable.label}" y todas sus relaciones del diagrama?`}
-      confirmLabel="Eliminar"
+      title={t.modals.tableModal.deleteTableConfirmTitle}
+      description={t.modals.tableModal.deleteTableConfirmDescription(currentTable.label)}
+      confirmLabel={t.common.delete}
       onConfirm={handleConfirmDelete}
     />
     </>

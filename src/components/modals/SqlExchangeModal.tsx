@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { DbEngineSelect, type DbEngineOption } from "@/components/ui/DbEngineSelect";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useTranslation } from "@/store/useSettingsStore";
 import {
   exportDbmlToSql,
   importSqlSchema,
@@ -72,6 +73,7 @@ export function SqlExchangeModal({
 }: SqlExchangeModalProps) {
   const { dbmlCode, applyDbmlWithAutoLayout, activeProject } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
+  const { t } = useTranslation();
 
   const [internalTab, setInternalTab] = useState<"export" | "import">(defaultTab);
   const activeTab = controlledTab ?? internalTab;
@@ -206,10 +208,10 @@ export function SqlExchangeModal({
               <Database className="w-5 h-5 text-app-accent-text" />
               <div>
                 <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-                  Intercambio SQL y Esquemas DDL
+                  {t.modals.sqlExchange.title}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Exporta tu arquitectura a scripts SQL nativos o importa esquemas existentes mediante ingeniería inversa.
+                  {t.modals.sqlExchange.description}
                 </DialogDescription>
               </div>
             </div>
@@ -225,7 +227,7 @@ export function SqlExchangeModal({
                     : "text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
-                Exportar SQL
+                {t.modals.sqlExchange.exportTab}
               </button>
               <button
                 type="button"
@@ -236,7 +238,7 @@ export function SqlExchangeModal({
                     : "text-slate-600 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-zinc-200"
                 }`}
               >
-                Importar SQL
+                {t.modals.sqlExchange.importTab}
               </button>
             </div>
           </div>
@@ -251,7 +253,7 @@ export function SqlExchangeModal({
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 p-2.5 rounded-lg shrink-0">
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 whitespace-nowrap">
-                  Motor de Base de Datos:
+                  {t.modals.sqlExchange.dbEngineLabel}
                 </span>
                 <DbEngineSelect
                   value={exportDialect}
@@ -271,12 +273,12 @@ export function SqlExchangeModal({
                   {copied ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">Copiado</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">{t.common.copied}</span>
                     </>
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      <span>Copiar SQL</span>
+                      <span>{t.modals.sqlExchange.copySql}</span>
                     </>
                   )}
                 </Button>
@@ -288,7 +290,7 @@ export function SqlExchangeModal({
                   className="h-8 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast gap-1.5 font-semibold shadow cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Descargar .{exportDialect === "json" ? "json" : "sql"}</span>
+                  <span>{t.modals.sqlExchange.downloadPrefix} .{exportDialect === "json" ? "json" : "sql"}</span>
                 </Button>
               </div>
             </div>
@@ -316,7 +318,7 @@ export function SqlExchangeModal({
             <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-zinc-950/80 border border-slate-200 dark:border-zinc-800/80 p-2.5 rounded-lg shrink-0">
               <div className="flex items-center gap-2.5">
                 <span className="text-xs font-semibold text-slate-700 dark:text-zinc-300 whitespace-nowrap">
-                  Dialecto de Origen:
+                  {t.modals.sqlExchange.sourceDialectLabel}
                 </span>
                 <DbEngineSelect
                   value={importDialect}
@@ -327,7 +329,7 @@ export function SqlExchangeModal({
                 {autoDetectedDialect && (
                   <span
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-app-accent-soft text-app-accent-text border border-app-accent-border"
-                    title={`Dialecto detectado automáticamente: ${DIALECT_LABELS[autoDetectedDialect]}`}
+                    title={t.modals.sqlExchange.autoDetectedTooltip(DIALECT_LABELS[autoDetectedDialect])}
                   >
                     <Sparkles className="w-3 h-3 shrink-0" />
                     <span>Auto: {DIALECT_LABELS[autoDetectedDialect]}</span>
@@ -338,7 +340,7 @@ export function SqlExchangeModal({
               <div className="flex flex-wrap items-center gap-3">
                 <label className="text-xs text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-300 dark:text-zinc-300 dark:hover:text-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:border-zinc-700 cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors shadow-sm">
                   <FileCode className="w-3.5 h-3.5 text-app-accent-text" />
-                  <span>Cargar archivo .sql</span>
+                  <span>{t.modals.sqlExchange.loadSqlFile}</span>
                   <input
                     type="file"
                     accept=".sql,.txt"
@@ -357,7 +359,7 @@ export function SqlExchangeModal({
                       onChange={() => setImportMode("replace")}
                       className="accent-app-accent"
                     />
-                    <span>Reemplazar</span>
+                    <span>{t.modals.sqlExchange.modeReplace}</span>
                   </label>
                   <label className="flex items-center gap-1.5 cursor-pointer hover:text-app-accent-text">
                     <input
@@ -368,7 +370,7 @@ export function SqlExchangeModal({
                       onChange={() => setImportMode("append")}
                       className="accent-app-accent"
                     />
-                    <span>Añadir</span>
+                    <span>{t.modals.sqlExchange.modeAppend}</span>
                   </label>
                 </div>
               </div>
@@ -381,7 +383,7 @@ export function SqlExchangeModal({
                   value={inputSql}
                   height="100%"
                   theme={resolvedTheme}
-                  placeholder="Pega aquí tu script o dump SQL completo (se extraerán automáticamente solo CREATE TABLE y sus relaciones, ignorando configuraciones y datos)..."
+                  placeholder={t.modals.sqlExchange.sqlPlaceholder}
                   extensions={[sql()]}
                   onChange={handleSqlInputChange}
                   className="text-[13px] font-mono h-full [&_.cm-editor]:h-full [&_.cm-scroller]:h-full [&_.cm-scroller]:overflow-auto"
@@ -396,21 +398,16 @@ export function SqlExchangeModal({
                   <span className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 dark:text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>
-                      Listo: {importPreview.result.report.tablesImported}{" "}
-                      {importPreview.result.report.tablesImported === 1 ? "tabla" : "tablas"} y{" "}
-                      {importPreview.result.report.relationshipsImported}{" "}
-                      {importPreview.result.report.relationshipsImported === 1
-                        ? "relación"
-                        : "relaciones"}
+                      {t.modals.sqlExchange.readySummary(
+                        importPreview.result.report.tablesImported,
+                        importPreview.result.report.relationshipsImported
+                      )}
                     </span>
                   </span>
 
                   {importPreview.result.report.ignoredStatementsTotal > 0 && (
                     <span className="text-slate-500 dark:text-zinc-400">
-                      · Se ignoraron {importPreview.result.report.ignoredStatementsTotal}{" "}
-                      {importPreview.result.report.ignoredStatementsTotal === 1
-                        ? "sentencia ajena al esquema"
-                        : "sentencias ajenas al esquema"}{" "}
+                      {t.modals.sqlExchange.ignoredSummary(importPreview.result.report.ignoredStatementsTotal)}{" "}
                       (
                       {importPreview.result.report.ignoredBreakdown
                         .slice(0, 4)
@@ -423,11 +420,7 @@ export function SqlExchangeModal({
 
                 {importPreview.result.report.skippedDuplicateTables.length > 0 && (
                   <div className="text-[11px] text-amber-700 dark:text-amber-400">
-                    Se omitirán {importPreview.result.report.skippedDuplicateTables.length}{" "}
-                    {importPreview.result.report.skippedDuplicateTables.length === 1
-                      ? "tabla que ya existe"
-                      : "tablas que ya existen"}{" "}
-                    en el diagrama:{" "}
+                    {t.modals.sqlExchange.skippedDuplicates(importPreview.result.report.skippedDuplicateTables.length)}{" "}
                     <span className="font-mono font-medium">
                       {importPreview.result.report.skippedDuplicateTables.join(", ")}
                     </span>
@@ -450,7 +443,7 @@ export function SqlExchangeModal({
                 onClick={() => onOpenChange(false)}
                 className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
               >
-                Cancelar
+                {t.common.cancel}
               </Button>
 
               <Button
@@ -460,7 +453,7 @@ export function SqlExchangeModal({
                 className="h-9 px-5 text-xs bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast font-semibold gap-1.5 shadow-md cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>{isImporting ? "Organizando diagrama..." : "Convertir a Diagrama DBML"}</span>
+                <span>{isImporting ? t.modals.sqlExchange.importingStatus : t.modals.sqlExchange.importSubmit}</span>
                 <ArrowRight className="w-3 h-3" />
               </Button>
             </div>

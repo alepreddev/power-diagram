@@ -6,6 +6,7 @@ import { DiagramCanvas } from "@/components/canvas/DiagramCanvas";
 import { EditTableModal } from "@/components/modals/EditTableModal";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/store/useDiagramStore";
+import { useTranslation } from "@/store/useSettingsStore";
 
 const MIN_EDITOR_WIDTH = 280;
 const DEFAULT_EDITOR_WIDTH = 420;
@@ -73,6 +74,7 @@ export function Workspace() {
   }, [resize, stopResizing]);
 
   const { editingTable, closeEditTableModal, saveToDatabase } = useDiagramStore();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -111,7 +113,7 @@ export function Workspace() {
               className={`absolute top-0 -right-1 w-2 h-full cursor-col-resize z-30 group hover:bg-app-accent/20 active:bg-app-accent/40 transition-colors ${
                 isResizing ? "bg-app-accent/30" : ""
               }`}
-              title="Arrastra para ajustar el ancho (Doble clic para restaurar)"
+              title={t.workspace.resizeHandleTitle}
             >
               {/* Línea indicadora visual sobre el borde */}
               <div
@@ -138,17 +140,17 @@ export function Workspace() {
           className={`absolute bottom-4 z-20 h-8 px-2.5 bg-white/90 dark:bg-zinc-900/90 border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:text-slate-900 dark:hover:text-zinc-100 hover:bg-slate-100 dark:hover:bg-zinc-800 shadow-xl duration-200 ease-in-out ${
             isEditorOpen ? "left-4" : "left-16"
           }`}
-          title={isEditorOpen ? "Ocultar editor de código" : "Mostrar editor de código"}
+          title={isEditorOpen ? t.workspace.hideEditorTitle : t.workspace.showEditorTitle}
         >
           {isEditorOpen ? (
             <>
               <PanelLeftClose className="w-3.5 h-3.5 mr-1" />
-              <span className="text-[11px]">Ocultar Editor</span>
+              <span className="text-[11px]">{t.workspace.hideEditor}</span>
             </>
           ) : (
             <>
               <PanelLeftOpen className="w-3.5 h-3.5 mr-1 text-app-accent-text" />
-              <span className="text-[11px]">Abrir Editor</span>
+              <span className="text-[11px]">{t.workspace.showEditor}</span>
             </>
           )}
         </Button>

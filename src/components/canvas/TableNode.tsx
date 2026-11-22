@@ -3,6 +3,7 @@ import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Key, Database, Hash, Type, Calendar, ToggleLeft, FileText, Settings } from "lucide-react";
 import type { TableNode, ColumnData } from "@/lib/dbmlParser";
 import { useDiagramStore } from "@/store/useDiagramStore";
+import { useTranslation } from "@/store/useSettingsStore";
 
 // Selector de iconos según el tipo de dato SQL/DBML
 function getTypeIcon(typeName: string) {
@@ -106,6 +107,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
   const headerColor = data.headerColor || "#4f46e5"; // Indigo por defecto
   const openEditTableModal = useDiagramStore((state) => state.openEditTableModal);
   const edges = useDiagramStore((state) => state.edges);
+  const { t } = useTranslation();
 
   const tableName = data.label;
 
@@ -152,7 +154,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-[10px] text-slate-600 dark:text-zinc-400 font-mono bg-slate-200/70 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded">
-            {data.columns.length} cols
+            {t.canvas.colsCount(data.columns.length)}
           </span>
           <button
             type="button"
@@ -161,7 +163,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
               openEditTableModal(data);
             }}
             className="p-0.5 rounded text-slate-400 hover:text-app-accent-text hover:bg-slate-200/70 dark:text-zinc-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none cursor-pointer"
-            title="Editar características de la tabla"
+            title={t.canvas.editTableTooltip}
           >
             <Settings className="w-3.5 h-3.5" />
           </button>
@@ -172,7 +174,7 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
       <div className="py-1">
         {data.columns.length === 0 ? (
           <div className="px-3 py-2 text-center text-slate-400 dark:text-zinc-500 text-xs italic">
-            Sin columnas definidas
+            {t.canvas.noColumns}
           </div>
         ) : (
           data.columns.map((col) => (

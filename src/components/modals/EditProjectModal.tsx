@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { updateProject, type Project } from "@/db/database";
+import { useTranslation } from "@/store/useSettingsStore";
 import {
   DB_ENGINES,
   ProjectFormFields,
@@ -34,6 +35,7 @@ export function EditProjectModal({
   const [name, setName] = useState("");
   const [engine, setEngine] = useState<EngineType>("postgres");
   const [isSaving, setIsSaving] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (project) {
@@ -79,10 +81,10 @@ export function EditProjectModal({
             </div>
             <div>
               <DialogTitle className="text-base font-bold text-slate-900 dark:text-zinc-100">
-                Editar Base de Datos
+                {t.modals.editProject.title}
               </DialogTitle>
               <DialogDescription className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                Modifica el nombre o el motor asignado a tu proyecto de base de datos.
+                {t.modals.editProject.description}
               </DialogDescription>
             </div>
           </div>
@@ -94,7 +96,7 @@ export function EditProjectModal({
             onNameChange={setName}
             engine={engine}
             onEngineChange={setEngine}
-            placeholder="Nombre del proyecto"
+            placeholder={t.modals.projectForm.editNamePlaceholder}
           />
 
           <DialogFooter className="flex flex-row items-center justify-end gap-2.5 pt-2">
@@ -104,7 +106,7 @@ export function EditProjectModal({
               onClick={() => onOpenChange(false)}
               className="h-9 px-4 text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800"
             >
-              Cancelar
+              {t.common.cancel}
             </Button>
             <Button
               type="submit"
@@ -112,7 +114,7 @@ export function EditProjectModal({
               className="h-9 px-5 bg-app-accent hover:bg-app-accent-hover text-app-accent-contrast text-xs font-semibold shadow-md gap-1.5 cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>{isSaving ? "Guardando..." : "Guardar Cambios"}</span>
+              <span>{isSaving ? t.common.saving : t.common.saveChanges}</span>
             </Button>
           </DialogFooter>
         </form>

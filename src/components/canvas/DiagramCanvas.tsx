@@ -15,6 +15,7 @@ import { TableNodeMemo } from "./TableNode";
 import { RelationshipEdgeMemo } from "./RelationshipEdge";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useSettingsStore, useTranslation } from "@/store/useSettingsStore";
 import { layoutDiagramWithElk } from "@/lib/autoLayout";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +23,7 @@ import { Button } from "@/components/ui/button";
 function ZoomIndicator() {
   const zoom = useStore((state) => state.transform[2]);
   const { zoomTo } = useReactFlow();
+  const { t } = useTranslation();
   const zoomPercent = Math.round(zoom * 100);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -99,7 +101,7 @@ function ZoomIndicator() {
       onClick={() => zoomTo(1, { duration: 250 })}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      title={`Zoom aplicado: ${zoomPercent}% (Clic para restablecer al 100%)`}
+      title={t.canvas.zoomTooltip(zoomPercent)}
       aria-live="polite"
       className={`flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-xs font-mono font-semibold bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-200 shadow-lg hover:border-app-accent-border transition-all duration-200 cursor-pointer select-none ${
         isVisible
@@ -132,6 +134,7 @@ function CanvasContent() {
     layoutVersion,
   } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
+  const { t } = useTranslation();
   const { fitView } = useReactFlow();
 
   const nodeTypes = useMemo(() => ({ table: TableNodeMemo }), []);
@@ -153,7 +156,11 @@ function CanvasContent() {
     setNodes(arrangedNodes);
     setTimeout(() => {
       fitView({ duration: 400, ...FIT_VIEW_OPTIONS });
-      saveToDatabase();
+      if (useSettingsStore.getState().autoSave) {
+        saveToDatabase();
+      } else {
+        useDiagramStore.setState({ isDirty: true });
+      }
     }, 50);
   }, [nodes, edges, setNodes, fitView, saveToDatabase]);
 
@@ -207,20 +214,20 @@ function CanvasContent() {
             size="sm"
             onClick={handleAutoLayout}
             className="h-8 gap-1.5 text-xs bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
-            title="Auto-organizar tablas matemáticamente para evitar cruce de líneas"
+            title={t.canvas.autoLayoutTitle}
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-            <span>Auto-Ordenar</span>
+            <span>{t.canvas.autoLayout}</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={() => fitView({ duration: 300, ...FIT_VIEW_OPTIONS })}
             className="h-8 gap-1.5 text-xs bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:border-zinc-700 dark:text-zinc-200"
-            title="Ajustar vista a todas las tablas"
+            title={t.canvas.centerViewTitle}
           >
             <ZoomIn className="w-3.5 h-3.5 text-app-accent-text" />
-            <span>Centrar</span>
+            <span>{t.canvas.centerView}</span>
           </Button>
         </div>
       </div>

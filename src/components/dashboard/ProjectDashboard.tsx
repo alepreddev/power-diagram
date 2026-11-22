@@ -7,6 +7,7 @@ import { DashboardOptionsMenu } from "./DashboardOptionsMenu";
 import { CreateProjectModal } from "@/components/modals/CreateProjectModal";
 import { EditProjectModal } from "@/components/modals/EditProjectModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
+import { useTranslation } from "@/store/useSettingsStore";
 
 const RECENT_PROJECTS_KEY = "power_diagram_recent_projects";
 
@@ -77,6 +78,9 @@ function ProjectCard({
   onEdit,
   onDelete,
 }: ProjectCardProps) {
+  const { t, language } = useTranslation();
+  const dateLocale = language === "en" ? "en-US" : "es-ES";
+
   return (
     <div
       onClick={onOpen}
@@ -107,7 +111,7 @@ function ProjectCard({
                 onEdit();
               }}
               className="h-7 w-7 p-0 text-slate-400 hover:text-app-accent-text hover:bg-app-accent-subtle rounded"
-              title="Editar proyecto"
+              title={t.dashboard.editProjectTitle}
             >
               <Pencil className="w-3.5 h-3.5" />
             </Button>
@@ -119,7 +123,7 @@ function ProjectCard({
                 onDelete();
               }}
               className="h-7 w-7 p-0 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:text-zinc-500 dark:hover:text-red-400 dark:hover:bg-red-500/10 rounded"
-              title="Eliminar proyecto"
+              title={t.dashboard.deleteProjectTitle}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -133,14 +137,14 @@ function ProjectCard({
 
       <div className="mt-4 pt-1 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-500">
         <span>
-          {new Date(project.created_at).toLocaleDateString([], {
+          {new Date(project.created_at).toLocaleDateString(dateLocale, {
             day: "2-digit",
             month: "short",
             year: "numeric",
           })}
         </span>
         <span className="flex items-center gap-1 text-app-accent-text opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-          <span>Abrir</span>
+          <span>{t.dashboard.open}</span>
           <ArrowRight className="w-3 h-3" />
         </span>
       </div>
@@ -149,6 +153,7 @@ function ProjectCard({
 }
 
 export function ProjectDashboard() {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [recentProjectIds, setRecentProjectIds] = useState<number[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -264,7 +269,7 @@ export function ProjectDashboard() {
                 Power Diagram
               </h1>
             </div>
-            <span className="text-[10px] text-slate-500 dark:text-zinc-400">ERD Studio & SQL Architect</span>
+            <span className="text-[10px] text-slate-500 dark:text-zinc-400">{t.dashboard.tagline}</span>
           </div>
         </div>
 
@@ -278,10 +283,10 @@ export function ProjectDashboard() {
         {/* Cabecera de la sección */}
         <div className="border-b border-slate-200 dark:border-zinc-800 pb-5">
           <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100">
-            Mis Bases de Datos
+            {t.dashboard.title}
           </h2>
           <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-            Administra tus diagramas relacionales, esquemas DBML y arquitecturas de datos.
+            {t.dashboard.subtitle}
           </p>
         </div>
 
@@ -292,7 +297,7 @@ export function ProjectDashboard() {
               id="quick-access-heading"
               className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400"
             >
-              Nuevo y Recientes
+              {t.dashboard.quickAccessTitle}
             </h3>
           </div>
 
@@ -307,8 +312,8 @@ export function ProjectDashboard() {
                 <Plus className="w-4 h-4" />
               </div>
               <div className="text-center">
-                <span className="text-xs font-semibold block">Nueva Base de Datos</span>
-                <span className="text-[11px] text-slate-400 dark:text-zinc-500">Diseñar nuevo esquema ERD</span>
+                <span className="text-xs font-semibold block">{t.dashboard.newDatabaseTitle}</span>
+                <span className="text-[11px] text-slate-400 dark:text-zinc-500">{t.dashboard.newDatabaseSubtitle}</span>
               </div>
             </button>
 
@@ -317,7 +322,7 @@ export function ProjectDashboard() {
               <ProjectCard
                 key={`recent-${project.id}`}
                 project={project}
-                badgeLabel="Reciente"
+                badgeLabel={t.dashboard.recentBadge}
                 onOpen={() => handleOpenProject(project)}
                 onEdit={() => setEditingProject(project)}
                 onDelete={() => setDeletingProject(project)}
@@ -333,19 +338,19 @@ export function ProjectDashboard() {
               id="registered-projects-heading"
               className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400"
             >
-              Proyectos Registrados ({projects.length})
+              {t.dashboard.registeredProjectsTitle(projects.length)}
             </h3>
           </div>
 
           {isLoading ? (
             <div className="text-center py-16 text-slate-500 dark:text-zinc-500 text-sm">
-              Cargando proyectos desde SQLite...
+              {t.dashboard.loadingProjects}
             </div>
           ) : projects.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-slate-200 dark:border-zinc-800/80 rounded-lg p-8 text-slate-500 dark:text-zinc-400 space-y-1">
-              <p className="text-sm font-medium">No hay proyectos registrados todavía</p>
+              <p className="text-sm font-medium">{t.dashboard.emptyTitle}</p>
               <p className="text-xs text-slate-400 dark:text-zinc-500">
-                Crea tu primera base de datos usando el botón superior.
+                {t.dashboard.emptySubtitle}
               </p>
             </div>
           ) : (
@@ -387,9 +392,9 @@ export function ProjectDashboard() {
         onOpenChange={(open) => {
           if (!open && !isDeleting) setDeletingProject(null);
         }}
-        title="Eliminar Base de Datos"
-        description={`¿Estás seguro de que deseas eliminar "${targetDeletingProject?.name ?? ""}" y su diagrama? Esta acción no se puede deshacer.`}
-        confirmLabel="Eliminar"
+        title={t.dashboard.deleteModalTitle}
+        description={t.dashboard.deleteModalDescription(targetDeletingProject?.name ?? "")}
+        confirmLabel={t.common.delete}
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
       />

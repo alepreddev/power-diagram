@@ -1,5 +1,6 @@
 import { Sun, Moon } from "lucide-react";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useTranslation } from "@/store/useSettingsStore";
 import { Button } from "@/components/ui/button";
 
 interface ThemeToggleProps {
@@ -8,6 +9,7 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { resolvedTheme, toggleTheme } = useThemeStore();
+  const { t } = useTranslation();
   const isDark = resolvedTheme === "dark";
 
   return (
@@ -17,11 +19,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         size="sm"
         onClick={toggleTheme}
         className="h-8 w-8 p-0 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-        title={
-          isDark
-            ? "Cambiar a Modo Claro"
-            : "Cambiar a Modo Oscuro"
-        }
+        title={isDark ? t.themeToggle.switchToLight : t.themeToggle.switchToDark}
       >
         {isDark ? (
           <Sun className="w-4 h-4 text-amber-400 transition-transform duration-200 rotate-0 hover:rotate-45" />

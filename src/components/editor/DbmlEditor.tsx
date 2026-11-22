@@ -4,11 +4,13 @@ import { AlertCircle, Code2, Copy, Check } from "lucide-react";
 import { useState } from "react";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useTranslation } from "@/store/useSettingsStore";
 import { Button } from "@/components/ui/button";
 
 export function DbmlEditor() {
   const { dbmlCode, setDbmlCode, syntaxError, nodes, edges } = useDiagramStore();
   const { resolvedTheme } = useThemeStore();
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -23,9 +25,9 @@ export function DbmlEditor() {
       <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 shrink-0">
         <div className="flex items-center gap-2 min-w-0 pr-2">
           <Code2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
-          <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 shrink-0">Editor DBML</span>
+          <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 shrink-0">{t.editor.title}</span>
           <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono truncate">
-            ({nodes.length} tablas, {edges.length} relaciones)
+            {t.editor.counts(nodes.length, edges.length)}
           </span>
         </div>
 
@@ -34,17 +36,17 @@ export function DbmlEditor() {
           size="sm"
           onClick={handleCopy}
           className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800"
-          title="Copiar código DBML al portapapeles"
+          title={t.editor.copyTitle}
         >
           {copied ? (
             <>
               <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 mr-1" />
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Copiado</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">{t.common.copied}</span>
             </>
           ) : (
             <>
               <Copy className="w-3.5 h-3.5 mr-1" />
-              <span className="text-[11px]">Copiar</span>
+              <span className="text-[11px]">{t.common.copy}</span>
             </>
           )}
         </Button>
@@ -96,7 +98,7 @@ export function DbmlEditor() {
           <AlertCircle className="w-4 h-4 text-red-500 dark:text-red-400 shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-semibold text-red-800 dark:text-red-200">
-              Error sintáctico {syntaxError.line ? `(Línea ${syntaxError.line})` : ""}:
+              {t.editor.syntaxErrorPrefix(syntaxError.line)}
             </span>{" "}
             <span className="text-red-600 dark:text-red-300/90">{syntaxError.message}</span>
           </div>
