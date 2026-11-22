@@ -76,6 +76,14 @@ const es = {
     deleteModalTitle: "Eliminar Base de Datos",
     deleteModalDescription: (name: string) =>
       `¿Estás seguro de que deseas eliminar "${name}" y su diagrama? Esta acción no se puede deshacer.`,
+    viewModeLabel: "Formato de vista",
+    viewGrid: "Vista de cuadrícula",
+    viewList: "Vista de lista",
+    viewTable: "Vista de tabla",
+    tableColProject: "Proyecto",
+    tableColEngine: "Motor",
+    tableColCreated: "Creado",
+    tableColActions: "Acciones",
   },
   optionsMenu: {
     optionsTitle: "Opciones",
@@ -371,6 +379,14 @@ const en: Translations = {
     deleteModalTitle: "Delete Database",
     deleteModalDescription: (name: string) =>
       `Are you sure you want to delete "${name}" and its diagram? This action cannot be undone.`,
+    viewModeLabel: "View layout",
+    viewGrid: "Grid view",
+    viewList: "List view",
+    viewTable: "Table view",
+    tableColProject: "Project",
+    tableColEngine: "Engine",
+    tableColCreated: "Created",
+    tableColActions: "Actions",
   },
   optionsMenu: {
     optionsTitle: "Options",
