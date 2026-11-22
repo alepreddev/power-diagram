@@ -30,6 +30,14 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectItemText,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useSettingsStore, useTranslation } from "@/store/useSettingsStore";
 import { ACCENT_COLORS } from "@/config/themes";
@@ -293,81 +301,64 @@ function SettingsPreferencesContent() {
           </h4>
         </div>
 
-        <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
-          {t.preferences.settings.languageDescription}
-        </p>
+        <div className="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1 min-w-0">
+            <span className="block text-xs font-semibold text-slate-900 dark:text-zinc-100">
+              {t.preferences.settings.languageSectionTitle}
+            </span>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 leading-relaxed">
+              {t.preferences.settings.languageDescription}
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {LANGUAGE_OPTIONS.map((opt) => {
-            const isSelected = opt.available && language === opt.id;
-            const localizedName = opt.labels[language];
+          <Select
+            value={language}
+            onValueChange={(val) => setLanguage(val as AppLanguage)}
+          >
+            <SelectTrigger
+              aria-label={t.preferences.settings.languageSectionTitle}
+              className="w-full sm:w-60 h-9 shrink-0 bg-slate-50 dark:bg-zinc-950 border-slate-300 dark:border-zinc-800"
+            >
+              <span className="flex items-center gap-2 min-w-0 truncate">
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 shrink-0 uppercase">
+                  {language}
+                </span>
+                <SelectValue />
+              </span>
+            </SelectTrigger>
 
-            if (!opt.available) {
-              return (
-                <div
-                  key={opt.id}
-                  aria-disabled="true"
-                  className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border border-dashed border-slate-200 dark:border-zinc-800/90 bg-slate-50/70 dark:bg-zinc-950/50 opacity-70 cursor-not-allowed select-none"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="w-8 h-8 rounded-lg bg-slate-200/70 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 text-[11px] font-mono font-bold flex items-center justify-center shrink-0">
-                      {opt.code}
-                    </span>
-                    <div className="min-w-0">
-                      <span className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">
-                        {opt.nativeName}
-                      </span>
-                      <span className="block text-[11px] text-slate-400 dark:text-zinc-500 truncate">
-                        {localizedName}
-                      </span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 shrink-0">
-                    {t.common.comingSoon}
-                  </span>
-                </div>
-              );
-            }
-
-            return (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setLanguage(opt.id as AppLanguage)}
-                className={`flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-app-accent-subtle border-app-accent-border ring-1 ring-app-accent-ring shadow-xs"
-                    : "bg-white dark:bg-zinc-900/60 border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800/40"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span
-                    className={`w-8 h-8 rounded-lg text-[11px] font-mono font-bold flex items-center justify-center shrink-0 transition-colors ${
-                      isSelected
-                        ? "bg-app-accent text-app-accent-contrast"
-                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300"
-                    }`}
+            <SelectContent align="end">
+              {LANGUAGE_OPTIONS.map((opt) => {
+                const localizedName = opt.labels[language];
+                return (
+                  <SelectItem
+                    key={opt.id}
+                    value={opt.id}
+                    disabled={!opt.available}
                   >
-                    {opt.code}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="block text-xs font-semibold text-slate-900 dark:text-zinc-100 truncate">
-                      {opt.nativeName}
+                    <span className="flex items-center justify-between gap-3 w-full">
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 shrink-0">
+                          {opt.code}
+                        </span>
+                        <SelectItemText>{opt.nativeName}</SelectItemText>
+                        {localizedName !== opt.nativeName && (
+                          <span className="text-[11px] text-slate-400 dark:text-zinc-500">
+                            ({localizedName})
+                          </span>
+                        )}
+                      </span>
+                      {!opt.available && (
+                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 shrink-0">
+                          {t.common.comingSoon}
+                        </span>
+                      )}
                     </span>
-                    <span className="block text-[11px] text-slate-500 dark:text-zinc-400 truncate">
-                      {localizedName}
-                    </span>
-                  </div>
-                </div>
-
-                {isSelected && (
-                  <span className="w-5 h-5 rounded-full bg-app-accent text-app-accent-contrast flex items-center justify-center shrink-0">
-                    <Check className="w-3 h-3 stroke-[2.5]" />
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
       </section>
     </div>
