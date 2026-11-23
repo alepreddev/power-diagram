@@ -65,20 +65,10 @@ async function captureViewportPayload(
   }
 }
 
-/**
- * Exporta el lienzo completo de React Flow a una imagen PNG o SVG nítida
- * capturando todas las tablas y relaciones sin importar el zoom actual.
- */
-export async function exportDiagramImage(
-  nodes: Node[],
-  format: "png" | "svg",
-  projectName: string = "diagram"
-): Promise<boolean> {
-  const viewportElement = document.querySelector(".react-flow__viewport") as HTMLElement | null;
-  if (!viewportElement || nodes.length === 0) {
-    throw new Error("No hay tablas en el diagrama para exportar.");
-  }
-
+function buildViewportExportOptions(
+  viewportElement: HTMLElement,
+  nodes: Node[]
+): Record<string, unknown> {
   // Asegura dimensiones reales en píxeles CSS (1:1) para cada tabla
   const normalizedNodes = nodes.map((node) => {
     if (node.measured?.width && node.measured?.height) return node;
@@ -143,7 +133,7 @@ export async function exportDiagramImage(
     typeof document !== "undefined" && document.documentElement.classList.contains("dark");
   const backgroundColor = isDark ? "#09090b" : "#f8fafc";
 
-  const options = {
+  return {
     backgroundColor,
     width: imageWidth,
     height: imageHeight,
@@ -157,6 +147,27 @@ export async function exportDiagramImage(
       transformOrigin: "0 0",
     },
   };
+}
+
+function getViewportForExport(nodes: Node[]): HTMLElement {
+  const viewportElement = document.querySelector(".react-flow__viewport") as HTMLElement | null;
+  if (!viewportElement || nodes.length === 0) {
+    throw new Error("No hay tablas en el diagrama para exportar.");
+  }
+  return viewportElement;
+}
+
+/**
+ * Exporta el lienzo completo de React Flow a una imagen PNG o SVG nítida
+ * capturando todas las tablas y relaciones sin importar el zoom actual.
+ */
+export async function exportDiagramImage(
+  nodes: Node[],
+  format: "png" | "svg",
+  projectName: string = "diagram"
+): Promise<boolean> {
+  const viewportElement = getViewportForExport(nodes);
+  const options = buildViewportExportOptions(viewportElement, nodes);
 
   const payload = await captureViewportPayload(viewportElement, format, options);
   const safeName = projectName.trim().toLowerCase().replace(/\s+/g, "_") || "diagram";
@@ -167,4 +178,27 @@ export async function exportDiagramImage(
     extensions: [format],
     mimeType: format === "png" ? "image/png" : "image/svg+xml",
   });
+}
+
+/**
+ * Renderiza el diagrama completo como PNG y lo copia directamente al portapapeles.
+ */
+export async function copyDiagramImageToClipboard(nodes: Node[]): Promise<void> {
+  if (
+    typeof navigator === "undefined" ||
+    !navigator.clipboard?.write ||
+    typeof ClipboardItem === "undefined"
+  ) {
+    throw new Error("El portapapeles de imágenes no está disponible en este entorno.");
+  }
+
+  const viewportElement = getViewportForExport(nodes);
+  const options = buildViewportExportOptions(viewportElement, nodes);
+  const bytes = await captureViewportPayload(viewportElement, "png", options);
+  if (typeof bytes === "string") {
+    throw new Error("No se pudo generar el flujo binario PNG.");
+  }
+
+  const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "image/png" });
+  await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
 }

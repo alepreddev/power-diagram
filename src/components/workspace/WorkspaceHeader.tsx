@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { isTauri } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import {
   ArrowLeft,
   Loader2,
@@ -8,6 +10,8 @@ import {
   FileCode2,
   Upload,
   Image as ImageIcon,
+  FileImage,
+  Copy,
   Check,
   ChevronDown,
   SlidersHorizontal,
@@ -20,13 +24,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CreateTableModal } from "@/components/modals/CreateTableModal";
 import { SqlExchangeModal } from "@/components/modals/SqlExchangeModal";
 import { PreferencesModal } from "@/components/modals/PreferencesModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
-import { exportDiagramImage } from "@/lib/canvasExport";
+import { exportDiagramImage, copyDiagramImageToClipboard } from "@/lib/canvasExport";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function WorkspaceHeader() {
@@ -48,9 +53,10 @@ export function WorkspaceHeader() {
     tab: "export",
   });
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
-  const [isUnsavedExitOpen, setIsUnsavedExitOpen] = useState(false);
+  const [pendingExitAction, setPendingExitAction] = useState<"dashboard" | "window" | null>(null);
+  const forceCloseWindowRef = useRef(false);
   const [isExportingImage, setIsExportingImage] = useState(false);
-  const [imageExported, setImageExported] = useState(false);
+  const [imageFeedback, setImageFeedback] = useState<"exported" | "copied" | null>(null);
   const exportFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -61,11 +67,60 @@ export function WorkspaceHeader() {
     };
   }, []);
 
+  // Proteger el cierre nativo de la ventana cuando hay cambios sin guardar
+  useEffect(() => {
+    if (isTauri()) {
+      let cancelled = false;
+      let unlisten: (() => void) | undefined;
+
+      getCurrentWindow()
+        .onCloseRequested((event) => {
+          if (forceCloseWindowRef.current) return;
+          const { activeProject: currentProject, isDirty: dirty } = useDiagramStore.getState();
+          if (currentProject && dirty) {
+            event.preventDefault();
+            setPendingExitAction("window");
+          }
+        })
+        .then((fn) => {
+          if (cancelled) {
+            fn();
+          } else {
+            unlisten = fn;
+          }
+        })
+        .catch((err) => {
+          console.error("No se pudo registrar onCloseRequested:", err);
+        });
+
+      return () => {
+        cancelled = true;
+        unlisten?.();
+      };
+    }
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const { activeProject: currentProject, isDirty: dirty } = useDiagramStore.getState();
+      if (currentProject && dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
+
   if (!activeProject) return null;
+
+  const triggerImageFeedback = (type: "exported" | "copied") => {
+    setImageFeedback(type);
+    if (exportFeedbackTimer.current) clearTimeout(exportFeedbackTimer.current);
+    exportFeedbackTimer.current = setTimeout(() => setImageFeedback(null), 2000);
+  };
 
   const handleBackToProjects = () => {
     if (isDirty) {
-      setIsUnsavedExitOpen(true);
+      setPendingExitAction("dashboard");
       return;
     }
     closeProject();
@@ -76,13 +131,24 @@ export function WorkspaceHeader() {
       setIsExportingImage(true);
       const saved = await exportDiagramImage(nodes, format, activeProject.name);
       if (saved) {
-        setImageExported(true);
-        if (exportFeedbackTimer.current) clearTimeout(exportFeedbackTimer.current);
-        exportFeedbackTimer.current = setTimeout(() => setImageExported(false), 2000);
+        triggerImageFeedback("exported");
       }
     } catch (err) {
       console.error("Error al exportar imagen:", err);
       alert(err instanceof Error ? err.message : "Error al generar la imagen");
+    } finally {
+      setIsExportingImage(false);
+    }
+  };
+
+  const handleCopyImage = async () => {
+    try {
+      setIsExportingImage(true);
+      await copyDiagramImageToClipboard(nodes);
+      triggerImageFeedback("copied");
+    } catch (err) {
+      console.error("Error al copiar imagen al portapapeles:", err);
+      alert(err instanceof Error ? err.message : t.workspace.copyImageError);
     } finally {
       setIsExportingImage(false);
     }
@@ -172,30 +238,52 @@ export function WorkspaceHeader() {
             <span className="hidden md:inline">{t.workspace.importSql}</span>
           </Button>
 
-          {/* Exportar a Imagen */}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isExportingImage || nodes.length === 0}
-            onClick={() => handleExportImage("png")}
-            className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 cursor-pointer"
-            title={t.workspace.exportPngTitle}
-          >
-            {isExportingImage ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500 dark:text-purple-400" />
-            ) : imageExported ? (
-              <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
-            ) : (
-              <ImageIcon className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
-            )}
-            <span className="hidden md:inline">
-              {isExportingImage
-                ? t.workspace.exportingPng
-                : imageExported
-                  ? t.workspace.exportedPng
-                  : "PNG"}
-            </span>
-          </Button>
+          {/* Menú de Exportar / Copiar Imagen */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isExportingImage || nodes.length === 0}
+                className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 cursor-pointer"
+                title={t.workspace.exportImageTitle}
+              >
+                {isExportingImage ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-500 dark:text-purple-400" />
+                ) : imageFeedback ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400" />
+                ) : (
+                  <ImageIcon className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
+                )}
+                <span className="hidden md:inline">
+                  {isExportingImage
+                    ? t.workspace.exportingPng
+                    : imageFeedback === "exported"
+                      ? t.workspace.exportedPng
+                      : imageFeedback === "copied"
+                        ? t.workspace.copiedImage
+                        : t.workspace.exportImage}
+                </span>
+                <ChevronDown className="w-3 h-3 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end" sideOffset={6} className="w-52">
+              <DropdownMenuItem onSelect={() => handleExportImage("png")} className="gap-2">
+                <ImageIcon className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400 shrink-0" />
+                <span>{t.workspace.exportPngOption}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleExportImage("svg")} className="gap-2">
+                <FileImage className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400 shrink-0" />
+                <span>{t.workspace.exportSvgOption}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleCopyImage} className="gap-2">
+                <Copy className="w-3.5 h-3.5 text-app-accent-text shrink-0" />
+                <span>{t.workspace.copyImageOption}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
@@ -295,8 +383,10 @@ export function WorkspaceHeader() {
       />
 
       <ConfirmDialog
-        open={isUnsavedExitOpen}
-        onOpenChange={setIsUnsavedExitOpen}
+        open={pendingExitAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingExitAction(null);
+        }}
         title={t.workspace.unsavedExitTitle}
         description={t.workspace.unsavedExitDescription}
         confirmLabel={t.workspace.unsavedExitConfirm}
@@ -304,8 +394,15 @@ export function WorkspaceHeader() {
         tone="warning"
         icon={<AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400" />}
         onConfirm={() => {
-          setIsUnsavedExitOpen(false);
-          closeProject();
+          const action = pendingExitAction;
+          setPendingExitAction(null);
+          if (action === "window") {
+            forceCloseWindowRef.current = true;
+            const win = getCurrentWindow();
+            void win.close().catch(() => win.destroy());
+          } else {
+            closeProject();
+          }
         }}
       />
     </>
