@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Key, Database, Hash, Type, Calendar, ToggleLeft, FileText, Settings } from "lucide-react";
+import { Key, Database, Hash, Type, Calendar, ToggleLeft, FileText, Settings, Info } from "lucide-react";
 import type { TableNode, ColumnData } from "@/lib/dbmlParser";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useTranslation } from "@/store/useSettingsStore";
@@ -58,9 +58,16 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
           className={`truncate font-medium ${
             column.pk ? "text-slate-900 dark:text-zinc-100 font-semibold" : "text-slate-700 dark:text-zinc-300"
           }`}
+          title={column.note || column.name}
         >
           {column.name}
         </span>
+
+        {column.note && (
+          <span title={column.note} className="shrink-0 text-slate-400 dark:text-zinc-500">
+            <Info className="w-3 h-3" />
+          </span>
+        )}
       </div>
 
       {/* Tipo de dato y Constraints */}
@@ -72,6 +79,15 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
         {column.pk && (
           <span className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30">
             PK
+          </span>
+        )}
+
+        {column.increment && (
+          <span
+            className="text-[9px] font-bold tracking-wider px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+            title="Auto Increment"
+          >
+            AI
           </span>
         )}
 
@@ -104,7 +120,7 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
 }
 
 function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
-  const headerColor = data.headerColor || "#4f46e5"; // Indigo por defecto
+  const headerColor = data.headerColor || "var(--app-accent-main, #4f46e5)";
   const openEditTableModal = useDiagramStore((state) => state.openEditTableModal);
   const edges = useDiagramStore((state) => state.edges);
   const { t } = useTranslation();
@@ -171,6 +187,15 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
       </div>
 
       {/* Lista de columnas */}
+      {data.note && (
+        <div className="px-3 py-1.5 bg-slate-50/50 dark:bg-zinc-950/40 border-b border-slate-100 dark:border-zinc-800/70 text-[11px] text-slate-500 dark:text-zinc-400 flex items-start gap-1.5">
+          <Info className="w-3 h-3 shrink-0 mt-0.5 text-slate-400 dark:text-zinc-500" />
+          <span className="line-clamp-2 leading-snug" title={data.note}>
+            {data.note}
+          </span>
+        </div>
+      )}
+
       <div className="py-1">
         {data.columns.length === 0 ? (
           <div className="px-3 py-2 text-center text-slate-400 dark:text-zinc-500 text-xs italic">

@@ -16,6 +16,7 @@ import { RelationshipEdgeMemo } from "./RelationshipEdge";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useSettingsStore, useTranslation } from "@/store/useSettingsStore";
+import { getAccentDefinition } from "@/config/themes";
 import { layoutDiagramWithElk } from "@/lib/autoLayout";
 import { Button } from "@/components/ui/button";
 
@@ -133,7 +134,7 @@ function CanvasContent() {
     saveToDatabase,
     layoutVersion,
   } = useDiagramStore();
-  const { resolvedTheme } = useThemeStore();
+  const { resolvedTheme, accentColor } = useThemeStore();
   const { t } = useTranslation();
   const { fitView } = useReactFlow();
 
@@ -141,6 +142,8 @@ function CanvasContent() {
   const edgeTypes = useMemo(() => ({ relation: RelationshipEdgeMemo }), []);
 
   const isDark = resolvedTheme === "dark";
+  const accentDef = getAccentDefinition(accentColor);
+  const accentMain = (isDark ? accentDef.dark : accentDef.light).main;
 
   useEffect(() => {
     if (layoutVersion === 0) return;
@@ -198,7 +201,7 @@ function CanvasContent() {
           fitViewOptions={FIT_VIEW_OPTIONS}
         />
         <MiniMap
-          nodeColor={isDark ? "#6366f1" : "#4f46e5"}
+          nodeColor={accentMain}
           maskColor={isDark ? "rgba(9, 9, 11, 0.75)" : "rgba(241, 245, 249, 0.75)"}
           className="!bg-white/90 !border-slate-300 dark:!bg-zinc-900/90 dark:!border-zinc-800 rounded-lg shadow-xl"
         />

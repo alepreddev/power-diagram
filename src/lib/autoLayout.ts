@@ -22,7 +22,8 @@ export async function layoutDiagramWithElk(
     },
     children: nodes.map((node) => {
       const colCount = node.data.columns?.length || 1;
-      const height = 45 + colCount * 30 + 10;
+      const noteHeight = node.data.note ? 28 : 0;
+      const height = 45 + noteHeight + colCount * 30 + 10;
       const width = 280;
 
       return {

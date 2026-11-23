@@ -47,7 +47,7 @@ function RelationshipEdgeComponent({
 
   const edgeStyle = {
     ...style,
-    stroke: isHighlighted ? "#6366f1" : (style.stroke || "#64748b"),
+    stroke: isHighlighted ? "var(--app-accent-main, #6366f1)" : (style.stroke || "#64748b"),
     strokeWidth: isHighlighted ? 2.5 : 1.5,
     transition: "stroke 0.15s ease, stroke-width 0.15s ease",
   };

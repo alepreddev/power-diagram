@@ -24,7 +24,7 @@ export function DbmlEditor() {
       {/* Header del Editor */}
       <div className="flex items-center justify-between px-3 py-2 bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 shrink-0">
         <div className="flex items-center gap-2 min-w-0 pr-2">
-          <Code2 className="w-4 h-4 text-indigo-500 dark:text-indigo-400 shrink-0" />
+          <Code2 className="w-4 h-4 text-app-accent-text shrink-0" />
           <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 shrink-0">{t.editor.title}</span>
           <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono truncate">
             {t.editor.counts(nodes.length, edges.length)}
