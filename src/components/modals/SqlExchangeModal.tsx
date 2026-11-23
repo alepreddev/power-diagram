@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { sql } from "@codemirror/lang-sql";
 import {
@@ -56,6 +56,19 @@ const DIALECT_LABELS: Record<ImportDialect, string> = {
   mssql: "SQL Server",
 };
 
+function resolveProjectDialect(engine?: string): ImportDialect {
+  const normalized = engine?.toLowerCase();
+  if (
+    normalized === "postgres" ||
+    normalized === "mysql" ||
+    normalized === "sqlite" ||
+    normalized === "mssql"
+  ) {
+    return normalized;
+  }
+  return "postgres";
+}
+
 interface SqlExchangeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -86,24 +99,35 @@ export function SqlExchangeModal({
     }
   };
 
-  const [exportDialect, setExportDialect] = useState<ExportDialect>("postgres");
-  const [importDialect, setImportDialect] = useState<ImportDialect>("postgres");
+  const [exportDialect, setExportDialect] = useState<ExportDialect>(() =>
+    resolveProjectDialect(activeProject?.db_engine)
+  );
+  const [importDialect, setImportDialect] = useState<ImportDialect>(() =>
+    resolveProjectDialect(activeProject?.db_engine)
+  );
   const [autoDetectedDialect, setAutoDetectedDialect] = useState<ImportDialect | null>(null);
   const [inputSql, setInputSql] = useState("");
+  const inputSqlRef = useRef(inputSql);
+  inputSqlRef.current = inputSql;
   const [importMode, setImportMode] = useState<"replace" | "append">("replace");
   const [importError, setImportError] = useState<string | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Sincroniza la pestaña inicial y limpia errores previos cada vez que se abre la modal
+  // Sincroniza pestaña inicial, dialecto del proyecto y limpia errores previos cada vez que se abre la modal
   useEffect(() => {
     if (open) {
       if (!controlledTab) {
         setInternalTab(defaultTab);
       }
+      const projectDialect = resolveProjectDialect(activeProject?.db_engine);
+      setExportDialect(projectDialect);
+      if (!inputSqlRef.current.trim()) {
+        setImportDialect(projectDialect);
+      }
       setImportError(null);
     }
-  }, [open, defaultTab, controlledTab]);
+  }, [open, defaultTab, controlledTab, activeProject?.db_engine]);
 
   // Generar el SQL exportado de forma reactiva solo cuando la pestaña Exportar está visible
   const exportedSql = useMemo(() => {
