@@ -191,7 +191,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     },
 
     setDbmlCode: (code: string) => {
-      const { nodes, edges, error } = parseDbmlToGraph(code, get().nodes);
+      const { nodes, edges, error } = parseDbmlToGraph(code, get().nodes, {}, get().edges);
 
       set({
         dbmlCode: code,

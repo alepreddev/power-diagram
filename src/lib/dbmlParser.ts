@@ -57,7 +57,8 @@ export interface CanvasPositions {
 export function parseDbmlToGraph(
   dbmlCode: string,
   existingNodes: TableNode[] = [],
-  savedPositions: CanvasPositions = {}
+  savedPositions: CanvasPositions = {},
+  existingEdges: TableEdge[] = []
 ): ParseResult {
   if (!dbmlCode || !dbmlCode.trim()) {
     return { nodes: [], edges: [], error: null };
@@ -210,10 +211,10 @@ export function parseDbmlToGraph(
       column = diag.location?.start?.column;
     }
 
-    // Regla Senior: Conservamos los nodos existentes en vez de borrar el diagrama
+    // Regla Senior: Conservamos los nodos y aristas existentes en vez de borrar el diagrama
     return {
       nodes: existingNodes,
-      edges: [],
+      edges: existingEdges,
       error: {
         message: errorMessage,
         line,
