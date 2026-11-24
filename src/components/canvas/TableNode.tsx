@@ -119,10 +119,11 @@ function ColumnRow({ column, isLeftConnected, isRightConnected }: ColumnRowProps
   );
 }
 
-function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
+function TableNodeComponent({ id, data, selected }: NodeProps<TableNode>) {
   const headerColor = data.headerColor || "var(--app-accent-main, #4f46e5)";
   const openEditTableModal = useDiagramStore((state) => state.openEditTableModal);
   const edges = useDiagramStore((state) => state.edges);
+  const isHighlighted = useDiagramStore((state) => state.highlightedNodeId === id);
   const { t } = useTranslation();
 
   const tableName = data.label;
@@ -144,9 +145,11 @@ function TableNodeComponent({ data, selected }: NodeProps<TableNode>) {
   return (
     <div
       className={`rounded-lg bg-white dark:bg-zinc-900 border transition-all duration-150 min-w-[240px] max-w-[340px] ${
-        selected
-          ? "border-app-accent ring-2 ring-app-accent/30"
-          : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
+        isHighlighted
+          ? "border-app-accent ring-2 ring-app-accent shadow-[0_0_0_6px_var(--app-accent-ring)]"
+          : selected
+            ? "border-app-accent ring-2 ring-app-accent/30"
+            : "border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
       }`}
     >
       {/* Barra superior de acento de color */}
