@@ -110,6 +110,33 @@ export function WorkspaceHeader() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
+  // Atajos globales para modales del Workspace: Ctrl+N (Nueva Tabla), Ctrl+E (Exportar SQL), Ctrl+I (Importar SQL)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      const key = e.key.toLowerCase();
+      if (key !== "n" && key !== "e" && key !== "i") return;
+
+      // Evitar apilar modales si ya hay otra ventana modal abierta
+      const openDialog = document.querySelector('[role="dialog"]');
+      if (openDialog && !sqlModal.open) return;
+
+      if (key === "n" && !openDialog) {
+        e.preventDefault();
+        setIsCreateOpen(true);
+      } else if (key === "e") {
+        e.preventDefault();
+        setSqlModal({ open: true, tab: "export" });
+      } else if (key === "i") {
+        e.preventDefault();
+        setSqlModal({ open: true, tab: "import" });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [sqlModal.open]);
+
   if (!activeProject) return null;
 
   const triggerImageFeedback = (type: "exported" | "copied") => {

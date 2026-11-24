@@ -157,6 +157,7 @@ function CanvasContent() {
     onEdgesChange,
     onConnect,
     layoutVersion,
+    centerViewVersion,
     past,
     future,
     undo,
@@ -200,6 +201,11 @@ function CanvasContent() {
     }, 60);
     return () => clearTimeout(timer);
   }, [layoutVersion, fitView]);
+
+  useEffect(() => {
+    if (centerViewVersion === 0) return;
+    fitView({ duration: 300, ...FIT_VIEW_OPTIONS });
+  }, [centerViewVersion, fitView]);
 
   // Atajo global Ctrl+K / Cmd+K para abrir el buscador rápido del lienzo
   useEffect(() => {

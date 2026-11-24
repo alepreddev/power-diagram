@@ -8,6 +8,7 @@ import { EditRelationshipModal } from "@/components/modals/EditRelationshipModal
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useTranslation } from "@/store/useSettingsStore";
+import { formatDbmlCode } from "@/lib/dbmlFormatter";
 
 const MIN_EDITOR_WIDTH = 280;
 const DEFAULT_EDITOR_WIDTH = 420;
@@ -82,6 +83,9 @@ export function Workspace() {
     undo,
     redo,
     saveToDatabase,
+    runAutoLayout,
+    requestCenterView,
+    setDbmlCode,
   } = useDiagramStore();
   const { t } = useTranslation();
 
@@ -94,13 +98,53 @@ export function Workspace() {
       return Boolean(el.closest(".cm-editor"));
     };
 
+    const hasOpenDialog = () => Boolean(document.querySelector('[role="dialog"]'));
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!(e.ctrlKey || e.metaKey)) return;
       const key = e.key.toLowerCase();
 
-      if (key === "s") {
+      // Shift + Alt + F: Formatear código DBML desde cualquier parte del workspace
+      if (e.shiftKey && e.altKey && !e.ctrlKey && !e.metaKey && key === "f") {
+        if (hasOpenDialog()) return;
+        e.preventDefault();
+        const current = useDiagramStore.getState().dbmlCode;
+        if (current.trim()) {
+          const next = formatDbmlCode(current);
+          if (next !== current) setDbmlCode(next);
+        }
+        return;
+      }
+
+      if (!(e.ctrlKey || e.metaKey)) return;
+
+      // Ctrl + S: Guardar manualmente
+      if (key === "s" && !e.shiftKey) {
         e.preventDefault();
         saveToDatabase();
+        return;
+      }
+
+      // Ctrl + B: Mostrar / Ocultar panel del Editor DBML
+      if (key === "b" && !e.shiftKey && !e.altKey) {
+        if (hasOpenDialog()) return;
+        e.preventDefault();
+        setIsEditorOpen((prev) => !prev);
+        return;
+      }
+
+      // Ctrl + 0: Centrar vista a todas las tablas
+      if (e.key === "0" && !e.shiftKey && !e.altKey) {
+        if (hasOpenDialog()) return;
+        e.preventDefault();
+        requestCenterView();
+        return;
+      }
+
+      // Ctrl + Shift + L: Auto-Ordenar diagrama
+      if (key === "l" && e.shiftKey && !e.altKey) {
+        if (hasOpenDialog()) return;
+        e.preventDefault();
+        void runAutoLayout();
         return;
       }
 
@@ -118,7 +162,7 @@ export function Workspace() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [saveToDatabase, undo, redo]);
+  }, [saveToDatabase, undo, redo, runAutoLayout, requestCenterView, setDbmlCode]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 transition-colors">

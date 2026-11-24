@@ -129,8 +129,9 @@ interface DiagramState {
   editingEdge: TableEdge | null;
   highlightedNodeId: string | null;
 
-  // Contador para disparar fitView tras un auto-layout externo (ej. importación SQL)
+  // Contadores para disparar fitView desde acciones externas o atajos globales
   layoutVersion: number;
+  centerViewVersion: number;
 
   // Acciones
   setActiveProject: (project: Project) => Promise<void>;
@@ -138,6 +139,7 @@ interface DiagramState {
   setDbmlCode: (code: string) => void;
   applyDbmlWithAutoLayout: (code: string) => Promise<void>;
   runAutoLayout: (options?: AutoLayoutOptions) => Promise<void>;
+  requestCenterView: () => void;
   onNodesChange: OnNodesChange<DiagramNode>;
   onEdgesChange: OnEdgesChange<TableEdge>;
   onConnect: (connection: Connection) => void;
@@ -238,6 +240,7 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
     editingEdge: null,
     highlightedNodeId: null,
     layoutVersion: 0,
+    centerViewVersion: 0,
 
     setActiveProject: async (project: Project) => {
       dragStartSnapshot = null;
@@ -363,6 +366,10 @@ export const useDiagramStore = create<DiagramState>((set, get) => {
       }));
 
       scheduleAutoSave();
+    },
+
+    requestCenterView: () => {
+      set((state) => ({ centerViewVersion: state.centerViewVersion + 1 }));
     },
 
     onNodesChange: (changes) => {
