@@ -121,7 +121,7 @@ function inspectExistingDbml(existingDbml?: string): ExistingSchemaSnapshot {
   }
 
   try {
-    const db = Parser.parse(existingDbml, "dbml");
+    const db = Parser.parse(existingDbml, "dbmlv2");
     for (const schema of db.schemas) {
       for (const table of schema.tables) {
         const cols = new Map<string, string>();

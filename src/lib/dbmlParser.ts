@@ -22,12 +22,53 @@ export interface TableNodeData {
 
 export type TableNode = Node<TableNodeData, "table">;
 
+export interface EnumValueData {
+  name: string;
+  note?: string;
+}
+
+export interface EnumNodeData {
+  label: string;
+  values: EnumValueData[];
+  [key: string]: unknown;
+}
+
+export type EnumNode = Node<EnumNodeData, "enum">;
+
+export interface StickyNoteNodeData {
+  label: string;
+  content: string;
+  [key: string]: unknown;
+}
+
+export type StickyNoteNode = Node<StickyNoteNodeData, "note">;
+
+export interface TableGroupNodeData {
+  label: string;
+  color?: string;
+  tableNames: string[];
+  [key: string]: unknown;
+}
+
+export type TableGroupNode = Node<TableGroupNodeData, "group">;
+
+export type DiagramNode = TableNode | EnumNode | StickyNoteNode | TableGroupNode;
+
 export type RelationshipType = "1:1" | "1:n" | "n:1" | "n:m";
+
+export type ReferentialAction =
+  | "no action"
+  | "restrict"
+  | "cascade"
+  | "set null"
+  | "set default";
 
 export interface RelationshipEdgeData {
   relationType: RelationshipType;
   sourceColumn: string;
   targetColumn: string;
+  onDelete?: string;
+  onUpdate?: string;
   [key: string]: unknown;
 }
 
@@ -40,7 +81,7 @@ export interface ParserError {
 }
 
 export interface ParseResult {
-  nodes: TableNode[];
+  nodes: DiagramNode[];
   edges: TableEdge[];
   error: ParserError | null;
 }
@@ -49,14 +90,131 @@ export interface CanvasPositions {
   [tableName: string]: { x: number; y: number };
 }
 
+function estimateNodeSize(node: DiagramNode): { width: number; height: number } {
+  const measuredW = node.measured?.width ?? (typeof node.width === "number" ? node.width : undefined);
+  const measuredH =
+    node.measured?.height ?? (typeof node.height === "number" ? node.height : undefined);
+  if (measuredW && measuredH) {
+    return { width: measuredW, height: measuredH };
+  }
+
+  if (node.type === "table") {
+    const colCount = node.data.columns?.length || 1;
+    const noteHeight = node.data.note ? 28 : 0;
+    return {
+      width: measuredW ?? 280,
+      height: measuredH ?? 45 + noteHeight + colCount * 30 + 10,
+    };
+  }
+
+  if (node.type === "enum") {
+    const valCount = node.data.values?.length || 1;
+    return {
+      width: measuredW ?? 220,
+      height: measuredH ?? 44 + valCount * 26 + 10,
+    };
+  }
+
+  if (node.type === "note") {
+    const lines = Math.max(2, node.data.content.split(/\r?\n/).length);
+    return {
+      width: measuredW ?? 230,
+      height: measuredH ?? 48 + lines * 18 + 16,
+    };
+  }
+
+  return { width: measuredW ?? 320, height: measuredH ?? 200 };
+}
+
 /**
- * Parsea el código DBML y lo transforma en Nodos y Aristas para React Flow.
- * Si ocurre un error de sintaxis, no borra el diagrama: conserva los nodos previos
+ * Recalcula la posición y el tamaño de cada marco TableGroup alrededor de sus tablas miembro
+ * y garantiza que los nodos `group` se ubiquen al principio del array para quedar detrás en z-order.
+ */
+export function recomputeGroupNodes(nodes: DiagramNode[]): DiagramNode[] {
+  const tableMap = new Map<string, TableNode>();
+  const groupNodes: TableGroupNode[] = [];
+  const otherNodes: DiagramNode[] = [];
+
+  for (const node of nodes) {
+    if (node.type === "table") {
+      tableMap.set(node.id.toLowerCase(), node);
+      otherNodes.push(node);
+    } else if (node.type === "group") {
+      groupNodes.push(node);
+    } else {
+      otherNodes.push(node);
+    }
+  }
+
+  if (groupNodes.length === 0) {
+    return nodes;
+  }
+
+  const PAD_LEFT = 24;
+  const PAD_RIGHT = 24;
+  const PAD_BOTTOM = 24;
+  const PAD_TOP = 44;
+
+  const updatedGroups: TableGroupNode[] = groupNodes.map((group) => {
+    const members = group.data.tableNames
+      .map((name) => tableMap.get(name.toLowerCase()))
+      .filter((t): t is TableNode => Boolean(t));
+
+    if (members.length === 0) {
+      return {
+        ...group,
+        zIndex: -1,
+        draggable: false,
+        selectable: false,
+        style: { ...(group.style || {}), width: 260, height: 140 },
+      };
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const member of members) {
+      const { width, height } = estimateNodeSize(member);
+      minX = Math.min(minX, member.position.x);
+      minY = Math.min(minY, member.position.y);
+      maxX = Math.max(maxX, member.position.x + width);
+      maxY = Math.max(maxY, member.position.y + height);
+    }
+
+    const x = Math.round(minX - PAD_LEFT);
+    const y = Math.round(minY - PAD_TOP);
+    const width = Math.round(maxX - minX + PAD_LEFT + PAD_RIGHT);
+    const height = Math.round(maxY - minY + PAD_TOP + PAD_BOTTOM);
+
+    return {
+      ...group,
+      position: { x, y },
+      width,
+      height,
+      zIndex: -1,
+      draggable: false,
+      selectable: false,
+      style: {
+        ...(group.style || {}),
+        width,
+        height,
+      },
+    };
+  });
+
+  return [...updatedGroups, ...otherNodes];
+}
+
+/**
+ * Parsea el código DBML (sintaxis v2) y lo transforma en Nodos y Aristas para React Flow.
+ * Si ocurre un error de sintaxis, no borra el diagrama: conserva los nodos y aristas previos
  * y retorna el objeto de error para mostrarlo en la UI.
  */
 export function parseDbmlToGraph(
   dbmlCode: string,
-  existingNodes: TableNode[] = [],
+  existingNodes: DiagramNode[] = [],
   savedPositions: CanvasPositions = {},
   existingEdges: TableEdge[] = []
 ): ParseResult {
@@ -65,24 +223,26 @@ export function parseDbmlToGraph(
   }
 
   try {
-    const database = Parser.parse(dbmlCode, "dbml");
+    const database = Parser.parse(dbmlCode, "dbmlv2");
     const existingPositionsMap = new Map<string, { x: number; y: number }>();
 
     // 1. Priorizar posiciones del estado actual en el canvas
     for (const node of existingNodes) {
+      if (node.type === "group") continue;
       existingPositionsMap.set(node.id, { x: node.position.x, y: node.position.y });
     }
 
     // 2. Si no están en el estado actual, buscar en las guardadas de SQLite
-    for (const [tableName, pos] of Object.entries(savedPositions)) {
-      if (!existingPositionsMap.has(tableName)) {
-        existingPositionsMap.set(tableName, pos);
+    for (const [nodeId, pos] of Object.entries(savedPositions)) {
+      if (!existingPositionsMap.has(nodeId)) {
+        existingPositionsMap.set(nodeId, pos);
       }
     }
 
-    const nodes: TableNode[] = [];
+    const nodes: DiagramNode[] = [];
     const edges: TableEdge[] = [];
-    let tableIndex = 0;
+    const seenEdgeIds = new Set<string>();
+    let elementIndex = 0;
 
     for (const schema of database.schemas) {
       for (const table of schema.tables) {
@@ -91,8 +251,8 @@ export function parseDbmlToGraph(
 
         // Posición calculada en cuadrícula limpia si la tabla es nueva
         const defaultPosition = {
-          x: (tableIndex % 3) * 360 + 50,
-          y: Math.floor(tableIndex / 3) * 300 + 50,
+          x: (elementIndex % 3) * 360 + 50,
+          y: Math.floor(elementIndex / 3) * 300 + 50,
         };
 
         // Extraer PKs y UNIQUE de una sola columna declarados en bloques Indexes
@@ -143,7 +303,51 @@ export function parseDbmlToGraph(
           },
         });
 
-        tableIndex++;
+        elementIndex++;
+      }
+
+      // Procesar enumeraciones (Enum)
+      for (const enumDef of schema.enums || []) {
+        const enumId = `enum:${enumDef.name}`;
+        const savedPos = existingPositionsMap.get(enumId);
+        const defaultPosition = {
+          x: (elementIndex % 3) * 360 + 50,
+          y: Math.floor(elementIndex / 3) * 300 + 50,
+        };
+
+        nodes.push({
+          id: enumId,
+          type: "enum",
+          position: savedPos || defaultPosition,
+          data: {
+            label: enumDef.name,
+            values: (enumDef.values || []).map((v) => ({
+              name: v.name,
+              note: v.note || undefined,
+            })),
+          },
+        });
+
+        elementIndex++;
+      }
+
+      // Procesar grupos de tablas (TableGroup)
+      for (const group of schema.tableGroups || []) {
+        const groupId = `group:${group.name}`;
+        const tableNames = (group.tables || []).map((t) => t.name).filter(Boolean);
+        nodes.push({
+          id: groupId,
+          type: "group",
+          position: existingPositionsMap.get(groupId) || { x: 0, y: 0 },
+          zIndex: -1,
+          draggable: false,
+          selectable: false,
+          data: {
+            label: group.name,
+            color: (group.color as unknown as string) || undefined,
+            tableNames,
+          },
+        });
       }
 
       // Procesar relaciones (Refs)
@@ -170,7 +374,14 @@ export function parseDbmlToGraph(
           relationType = "n:m";
         }
 
-        const edgeId = `ref-${sourceTable}.${sourceCol}-${targetTable}.${targetCol}`;
+        const baseId = `ref-${sourceTable}.${sourceCol}-${targetTable}.${targetCol}`;
+        let edgeId = baseId;
+        let dupIndex = 2;
+        while (seenEdgeIds.has(edgeId)) {
+          edgeId = `${baseId}#${dupIndex}`;
+          dupIndex++;
+        }
+        seenEdgeIds.add(edgeId);
 
         edges.push({
           id: edgeId,
@@ -184,13 +395,37 @@ export function parseDbmlToGraph(
             relationType,
             sourceColumn: sourceCol,
             targetColumn: targetCol,
+            onDelete: typeof ref.onDelete === "string" && ref.onDelete ? ref.onDelete : undefined,
+            onUpdate: typeof ref.onUpdate === "string" && ref.onUpdate ? ref.onUpdate : undefined,
           },
           style: { stroke: "#64748b", strokeWidth: 1.5 },
         });
       }
     }
 
-    return { nodes, edges, error: null };
+    // Procesar notas adhesivas de nivel raíz (Note)
+    for (const sticky of database.notes || []) {
+      const noteId = `note:${sticky.name}`;
+      const savedPos = existingPositionsMap.get(noteId);
+      const defaultPosition = {
+        x: (elementIndex % 3) * 360 + 50,
+        y: Math.floor(elementIndex / 3) * 300 + 50,
+      };
+
+      nodes.push({
+        id: noteId,
+        type: "note",
+        position: savedPos || defaultPosition,
+        data: {
+          label: sticky.name,
+          content: sticky.content || "",
+        },
+      });
+
+      elementIndex++;
+    }
+
+    return { nodes: recomputeGroupNodes(nodes), edges, error: null };
   } catch (err: unknown) {
     const errorObj = err as {
       message?: string;
@@ -418,16 +653,29 @@ export function removeTableFromDbml(currentDbml: string, tableName: string): str
 
   // Eliminar directivas Ref asociadas a esta tabla
   const refRegex1 = new RegExp(
-    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+\\s*[><-]\\s*.*$\\n?`,
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+\\s*(?:<>|[><-])\\s*.*$\\n?`,
     "gmi"
   );
   const refRegex2 = new RegExp(
-    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*.*\\s*[><-]\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+.*$\\n?`,
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*.*\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?${tableName}\\.[\\w_]+.*$\\n?`,
     "gmi"
   );
 
   updated = updated.replace(refRegex1, "").replace(refRegex2, "");
   return updated.trimEnd() + "\n";
+}
+
+function relationTypeToOperator(relationType: RelationshipType): "-" | ">" | "<" | "<>" {
+  switch (relationType) {
+    case "1:1":
+      return "-";
+    case "n:1":
+      return ">";
+    case "1:n":
+      return "<";
+    case "n:m":
+      return "<>";
+  }
 }
 
 /**
@@ -439,9 +687,9 @@ export function appendRefToDbml(
   sourceCol: string,
   targetTable: string,
   targetCol: string,
-  relation: ">" | "<" | "-" = ">"
+  relation: ">" | "<" | "-" | "<>" = ">"
 ): string {
-  const refLine = `\nRef: ${sourceTable}.${sourceCol} ${relation} ${targetTable}.${targetCol}\n`;
+  const refLine = `\nRef: ${formatDbmlIdentifier(sourceTable)}.${formatDbmlIdentifier(sourceCol)} ${relation} ${formatDbmlIdentifier(targetTable)}.${formatDbmlIdentifier(targetCol)}\n`;
   return `${currentDbml.trimEnd()}\n${refLine}`;
 }
 
@@ -451,7 +699,7 @@ function escapeRegExp(string: string): string {
 
 /**
  * Elimina quirúrgicamente una relación específica (Ref) entre dos tablas y columnas del código DBML.
- * Contempla relaciones directas, invertidas e inline en definiciones de columnas.
+ * Contempla relaciones directas, invertidas, n:m (<>) e inline en definiciones de columnas.
  */
 export function removeRefFromDbml(
   currentDbml: string,
@@ -467,13 +715,13 @@ export function removeRefFromDbml(
 
   // 1. Directiva Ref: fuente -> destino
   const refRegex1 = new RegExp(
-    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?.*$\\n?`,
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?.*$\\n?`,
     "gmi"
   );
 
   // 2. Directiva Ref: destino -> fuente
   const refRegex2 = new RegExp(
-    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?.*$\\n?`,
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?.*$\\n?`,
     "gmi"
   );
 
@@ -481,16 +729,137 @@ export function removeRefFromDbml(
 
   // 3. Inline ref en definición de columnas
   const inlineRefRegex1 = new RegExp(
-    `(?:,\\s*)?ref\\s*:\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?(?:\\s*,)?`,
+    `(?:,\\s*)?ref\\s*:\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?(?:\\s*,)?`,
     "gi"
   );
   const inlineRefRegex2 = new RegExp(
-    `(?:,\\s*)?ref\\s*:\\s*[><-]\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?(?:\\s*,)?`,
+    `(?:,\\s*)?ref\\s*:\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?(?:\\s*,)?`,
     "gi"
   );
 
-  updated = updated.replace(inlineRefRegex1, "").replace(inlineRefRegex2, "");
+  updated = updated
+    .replace(inlineRefRegex1, "")
+    .replace(inlineRefRegex2, "")
+    .replace(/\s*\[\s*\]/g, "");
 
   return updated.trimEnd() + "\n";
+}
+
+/**
+ * Actualiza la cardinalidad y acciones referenciales (onDelete / onUpdate) de una relación existente en DBML.
+ */
+export function updateRefInDbml(
+  currentDbml: string,
+  sourceTable: string,
+  sourceCol: string,
+  targetTable: string,
+  targetCol: string,
+  relationType: RelationshipType,
+  onDelete?: string,
+  onUpdate?: string
+): string {
+  const op = relationTypeToOperator(relationType);
+  const settings: string[] = [];
+  if (onDelete && onDelete.trim()) settings.push(`delete: ${onDelete.trim().toLowerCase()}`);
+  if (onUpdate && onUpdate.trim()) settings.push(`update: ${onUpdate.trim().toLowerCase()}`);
+  const settingsStr = settings.length > 0 ? ` [${settings.join(", ")}]` : "";
+
+  const formattedLine = `Ref: ${formatDbmlIdentifier(sourceTable)}.${formatDbmlIdentifier(sourceCol)} ${op} ${formatDbmlIdentifier(targetTable)}.${formatDbmlIdentifier(targetCol)}${settingsStr}`;
+
+  const sTable = escapeRegExp(sourceTable);
+  const sCol = escapeRegExp(sourceCol);
+  const tTable = escapeRegExp(targetTable);
+  const tCol = escapeRegExp(targetCol);
+
+  const refRegex1 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?.*$`,
+    "mi"
+  );
+  const refRegex2 = new RegExp(
+    `^\\s*Ref(?:\\s+[\\w_]+)?:\\s*(?:[\\w_]+\\.)?["']?${tTable}["']?\\.["']?${tCol}["']?\\s*(?:<>|[><-])\\s*(?:[\\w_]+\\.)?["']?${sTable}["']?\\.["']?${sCol}["']?.*$`,
+    "mi"
+  );
+
+  if (refRegex1.test(currentDbml)) {
+    return currentDbml.replace(refRegex1, formattedLine).trimEnd() + "\n";
+  }
+
+  if (refRegex2.test(currentDbml)) {
+    const invertedOp: "-" | ">" | "<" | "<>" = op === ">" ? "<" : op === "<" ? ">" : op;
+    const invertedLine = `Ref: ${formatDbmlIdentifier(targetTable)}.${formatDbmlIdentifier(targetCol)} ${invertedOp} ${formatDbmlIdentifier(sourceTable)}.${formatDbmlIdentifier(sourceCol)}${settingsStr}`;
+    return currentDbml.replace(refRegex2, invertedLine).trimEnd() + "\n";
+  }
+
+  // Si provenía de un ref inline dentro de una columna, removerlo y añadir la línea Ref explícita
+  const cleaned = removeRefFromDbml(currentDbml, sourceTable, sourceCol, targetTable, targetCol);
+  return `${cleaned.trimEnd()}\n\n${formattedLine}\n`;
+}
+
+/** Añade un bloque Enum al final del código DBML. */
+export function appendEnumToDbml(currentDbml: string, name: string, values: string[]): string {
+  const cleanValues = values
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .map((v) => `  ${formatDbmlIdentifier(v)}`)
+    .join("\n");
+  const block = `Enum ${formatDbmlIdentifier(name)} {\n${cleanValues}\n}`;
+  return `${currentDbml.trimEnd()}\n\n${block}\n`;
+}
+
+/** Elimina un bloque Enum del código DBML. */
+export function removeEnumFromDbml(currentDbml: string, name: string): string {
+  const escaped = escapeRegExp(name);
+  const regex = new RegExp(
+    `\\bEnum\\s+(?:[\\w_]+\\.)?["']?${escaped}["']?\\s*\\{[^\\}]*\\}\\s*`,
+    "gi"
+  );
+  return currentDbml.replace(regex, "").trimEnd() + "\n";
+}
+
+/** Añade una nota adhesiva (Note) al final del código DBML. */
+export function appendStickyNoteToDbml(currentDbml: string, name: string, content: string): string {
+  const cleanContent = content.trim().replace(/'''/g, "\\'\\'\\'");
+  const body = cleanContent.includes("\n")
+    ? `  '''\n${cleanContent
+        .split(/\r?\n/)
+        .map((line) => `  ${line}`)
+        .join("\n")}\n  '''`
+    : `  '${sanitizeNoteValue(cleanContent)}'`;
+  const block = `Note ${formatDbmlIdentifier(name)} {\n${body}\n}`;
+  return `${currentDbml.trimEnd()}\n\n${block}\n`;
+}
+
+/** Elimina una nota adhesiva (Note) del código DBML. */
+export function removeStickyNoteFromDbml(currentDbml: string, name: string): string {
+  const escaped = escapeRegExp(name);
+  const regex = new RegExp(`\\bNote\\s+["']?${escaped}["']?\\s*\\{[^\\}]*\\}\\s*`, "gi");
+  return currentDbml.replace(regex, "").trimEnd() + "\n";
+}
+
+/** Añade un bloque TableGroup al final del código DBML. */
+export function appendTableGroupToDbml(
+  currentDbml: string,
+  name: string,
+  tableNames: string[],
+  color?: string
+): string {
+  const settingsStr = color ? ` [color: ${color}]` : "";
+  const body = tableNames
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .map((t) => `  ${formatDbmlIdentifier(t)}`)
+    .join("\n");
+  const block = `TableGroup ${formatDbmlIdentifier(name)}${settingsStr} {\n${body}\n}`;
+  return `${currentDbml.trimEnd()}\n\n${block}\n`;
+}
+
+/** Elimina un bloque TableGroup del código DBML. */
+export function removeTableGroupFromDbml(currentDbml: string, name: string): string {
+  const escaped = escapeRegExp(name);
+  const regex = new RegExp(
+    `\\bTableGroup\\s+["']?${escaped}["']?\\s*(?:\\[[^\\]]*\\])?\\s*\\{[^\\}]*\\}\\s*`,
+    "gi"
+  );
+  return currentDbml.replace(regex, "").trimEnd() + "\n";
 }
 
