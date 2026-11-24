@@ -4,6 +4,7 @@ import { WorkspaceHeader } from "./WorkspaceHeader";
 import { DbmlEditor } from "@/components/editor/DbmlEditor";
 import { DiagramCanvas } from "@/components/canvas/DiagramCanvas";
 import { EditTableModal } from "@/components/modals/EditTableModal";
+import { EditRelationshipModal } from "@/components/modals/EditRelationshipModal";
 import { Button } from "@/components/ui/button";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useTranslation } from "@/store/useSettingsStore";
@@ -73,19 +74,51 @@ export function Workspace() {
     };
   }, [resize, stopResizing]);
 
-  const { editingTable, closeEditTableModal, saveToDatabase } = useDiagramStore();
+  const {
+    editingTable,
+    closeEditTableModal,
+    editingEdge,
+    closeEditEdgeModal,
+    undo,
+    redo,
+    saveToDatabase,
+  } = useDiagramStore();
   const { t } = useTranslation();
 
   useEffect(() => {
+    const isEditableContext = (el: Element | null) => {
+      if (!el) return false;
+      const tag = el.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return true;
+      if ((el as HTMLElement).isContentEditable) return true;
+      return Boolean(el.closest(".cm-editor"));
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const key = e.key.toLowerCase();
+
+      if (key === "s") {
         e.preventDefault();
         saveToDatabase();
+        return;
+      }
+
+      if (isEditableContext(document.activeElement)) {
+        return;
+      }
+
+      if (key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      } else if (key === "y" || (key === "z" && e.shiftKey)) {
+        e.preventDefault();
+        redo();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [saveToDatabase]);
+  }, [saveToDatabase, undo, redo]);
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 transition-colors">
@@ -168,6 +201,15 @@ export function Workspace() {
           if (!open) closeEditTableModal();
         }}
         tableData={editingTable}
+      />
+
+      {/* Modal Global para Editar la Relación Seleccionada */}
+      <EditRelationshipModal
+        open={Boolean(editingEdge)}
+        onOpenChange={(open) => {
+          if (!open) closeEditEdgeModal();
+        }}
+        edge={editingEdge}
       />
     </div>
   );

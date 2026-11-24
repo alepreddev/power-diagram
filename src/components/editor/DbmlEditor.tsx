@@ -13,6 +13,8 @@ export function DbmlEditor() {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
+  const tableCount = nodes.filter((n) => n.type === "table").length;
+
   const handleCopy = () => {
     navigator.clipboard.writeText(dbmlCode);
     setCopied(true);
@@ -27,7 +29,7 @@ export function DbmlEditor() {
           <Code2 className="w-4 h-4 text-app-accent-text shrink-0" />
           <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 shrink-0">{t.editor.title}</span>
           <span className="text-[10px] text-slate-500 dark:text-zinc-500 font-mono truncate">
-            {t.editor.counts(nodes.length, edges.length)}
+            {t.editor.counts(tableCount, edges.length)}
           </span>
         </div>
 
