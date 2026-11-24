@@ -24,6 +24,7 @@ function RelationshipEdgeComponent({
 }: EdgeProps<TableEdge>) {
   const [isHovered, setIsHovered] = useState(false);
   const deleteEdge = useDiagramStore((state) => state.deleteEdge);
+  const openEditEdgeModal = useDiagramStore((state) => state.openEditEdgeModal);
   const { t } = useTranslation();
 
   const [edgePath, labelX, labelY] = getSmoothStepPath({
@@ -37,6 +38,20 @@ function RelationshipEdgeComponent({
   });
 
   const relationType = data?.relationType || "1:n";
+  const hasActions = Boolean(data?.onDelete || data?.onUpdate);
+
+  const detailsParts: string[] = [];
+  if (data?.onDelete) detailsParts.push(`ON DELETE ${data.onDelete.toUpperCase()}`);
+  if (data?.onUpdate) detailsParts.push(`ON UPDATE ${data.onUpdate.toUpperCase()}`);
+  const detailsText = detailsParts.length > 0 ? detailsParts.join(", ") : undefined;
+
+  const handleOpenEditor = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const fullEdge = useDiagramStore.getState().edges.find((item) => item.id === id);
+    if (fullEdge) {
+      openEditEdgeModal(fullEdge);
+    }
+  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,13 +82,21 @@ function RelationshipEdgeComponent({
           onMouseLeave={() => setIsHovered(false)}
         >
           <div
-            className={`group/badge flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-all duration-150 shadow-sm border ${
+            onClick={handleOpenEditor}
+            className={`group/badge flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold transition-all duration-150 shadow-sm border cursor-pointer ${
               isHighlighted
                 ? "bg-app-accent text-app-accent-contrast border-app-accent shadow-md scale-110"
                 : "bg-white/95 dark:bg-zinc-900/95 text-slate-700 dark:text-zinc-300 border-slate-200 dark:border-zinc-800 hover:border-app-accent-border"
             }`}
-            title={t.canvas.relationTooltip(relationType)}
+            title={t.canvas.relationTooltip(relationType, detailsText)}
           >
+            {hasActions && (
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                  isHighlighted ? "bg-current opacity-85" : "bg-app-accent"
+                }`}
+              />
+            )}
             <span>{relationType}</span>
 
             {/* Botón de eliminación rápida en la relación */}
