@@ -16,6 +16,8 @@ import {
   ChevronDown,
   SlidersHorizontal,
   AlertTriangle,
+  BookOpen,
+  Download,
 } from "lucide-react";
 import { useDiagramStore } from "@/store/useDiagramStore";
 import { useSettingsStore, useTranslation } from "@/store/useSettingsStore";
@@ -29,9 +31,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CreateTableModal } from "@/components/modals/CreateTableModal";
 import { SqlExchangeModal } from "@/components/modals/SqlExchangeModal";
+import { DataDictionaryModal } from "@/components/modals/DataDictionaryModal";
 import { PreferencesModal } from "@/components/modals/PreferencesModal";
 import { ConfirmDialog } from "@/components/modals/ConfirmDialog";
 import { exportDiagramImage, copyDiagramImageToClipboard } from "@/lib/canvasExport";
+import {
+  exportProjectAsPdiag,
+  exportProjectAsDbml,
+  extractNodePositions,
+} from "@/lib/projectBackup";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function WorkspaceHeader() {
@@ -41,6 +49,7 @@ export function WorkspaceHeader() {
     isDirty,
     isSaving,
     saveToDatabase,
+    dbmlCode,
     nodes,
   } = useDiagramStore();
   const autoSave = useSettingsStore((state) => state.autoSave);
@@ -52,6 +61,7 @@ export function WorkspaceHeader() {
     open: false,
     tab: "export",
   });
+  const [isDictionaryOpen, setIsDictionaryOpen] = useState(false);
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const [pendingExitAction, setPendingExitAction] = useState<"dashboard" | "window" | null>(null);
   const forceCloseWindowRef = useRef(false);
@@ -110,24 +120,27 @@ export function WorkspaceHeader() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, []);
 
-  // Atajos globales para modales del Workspace: Ctrl+N (Nueva Tabla), Ctrl+E (Exportar SQL), Ctrl+I (Importar SQL)
+  // Atajos globales para modales del Workspace: Ctrl+N (Nueva Tabla), Ctrl+E (Exportar SQL), Ctrl+I (Importar SQL), Ctrl+D (Diccionario)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
       const key = e.key.toLowerCase();
-      if (key !== "n" && key !== "e" && key !== "i") return;
+      if (key !== "n" && key !== "e" && key !== "i" && key !== "d") return;
 
       // Evitar apilar modales si ya hay otra ventana modal abierta
       const openDialog = document.querySelector('[role="dialog"]');
-      if (openDialog && !sqlModal.open) return;
+      if (openDialog && !sqlModal.open && !isDictionaryOpen) return;
 
       if (key === "n" && !openDialog) {
         e.preventDefault();
         setIsCreateOpen(true);
-      } else if (key === "e") {
+      } else if (key === "d" && !openDialog) {
+        e.preventDefault();
+        setIsDictionaryOpen(true);
+      } else if (key === "e" && (!openDialog || sqlModal.open)) {
         e.preventDefault();
         setSqlModal({ open: true, tab: "export" });
-      } else if (key === "i") {
+      } else if (key === "i" && (!openDialog || sqlModal.open)) {
         e.preventDefault();
         setSqlModal({ open: true, tab: "import" });
       }
@@ -135,7 +148,7 @@ export function WorkspaceHeader() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [sqlModal.open]);
+  }, [sqlModal.open, isDictionaryOpen]);
 
   if (!activeProject) return null;
 
@@ -178,6 +191,26 @@ export function WorkspaceHeader() {
       alert(err instanceof Error ? err.message : t.workspace.copyImageError);
     } finally {
       setIsExportingImage(false);
+    }
+  };
+
+  const handleExportBackupFile = async () => {
+    try {
+      await exportProjectAsPdiag(
+        activeProject,
+        dbmlCode,
+        extractNodePositions(nodes)
+      );
+    } catch (err) {
+      console.error("Error al exportar respaldo .pdiag.json:", err);
+    }
+  };
+
+  const handleExportDbmlFile = async () => {
+    try {
+      await exportProjectAsDbml(activeProject.name, dbmlCode);
+    } catch (err) {
+      console.error("Error al exportar archivo .dbml:", err);
     }
   };
 
@@ -312,6 +345,18 @@ export function WorkspaceHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Diccionario de Datos (Markdown / HTML / PDF) */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDictionaryOpen(true)}
+            className="h-8 gap-1.5 text-xs bg-slate-100 border-slate-300 hover:bg-slate-200 text-slate-700 dark:bg-zinc-800 dark:border-zinc-700 dark:hover:bg-zinc-700 dark:text-zinc-200 cursor-pointer"
+            title={t.workspace.dataDictionaryTitle}
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+            <span className="hidden lg:inline">{t.workspace.dataDictionary}</span>
+          </Button>
+
           <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
           {/* Modal de Crear Tabla */}
@@ -353,7 +398,7 @@ export function WorkspaceHeader() {
                 </Button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" sideOffset={6} className="w-56">
+              <DropdownMenuContent align="end" sideOffset={6} className="w-60">
                 <DropdownMenuItem
                   onSelect={toggleAutoSave}
                   className="justify-between"
@@ -371,6 +416,15 @@ export function WorkspaceHeader() {
                   >
                     {autoSave ? t.workspace.autoSaveOn : t.workspace.autoSaveOff}
                   </span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleExportBackupFile} className="gap-2">
+                  <Download className="w-3.5 h-3.5 text-app-accent-text shrink-0" />
+                  <span>{t.workspace.exportBackupOption}</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleExportDbmlFile} className="gap-2">
+                  <FileCode2 className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-400 shrink-0" />
+                  <span>{t.workspace.exportDbmlOption}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -402,6 +456,11 @@ export function WorkspaceHeader() {
         onOpenChange={(open) => setSqlModal((prev) => ({ ...prev, open }))}
         activeTab={sqlModal.tab}
         onTabChange={(tab) => setSqlModal((prev) => ({ ...prev, tab }))}
+      />
+
+      <DataDictionaryModal
+        open={isDictionaryOpen}
+        onOpenChange={setIsDictionaryOpen}
       />
 
       <PreferencesModal
